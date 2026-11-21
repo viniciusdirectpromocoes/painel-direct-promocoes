@@ -524,9 +524,17 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
   aside.side .nav-marca { width: 34px; height: 26px; border-radius: 10px; background: transparent; }
   aside.side .nav-marca svg { width: 20px; height: 20px; }
 
+  .cabeca { margin-bottom: 14px; padding-right: 100px; }
+  .kpis { gap: 10px; margin-bottom: 14px; }
+  .kpis .kpi:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .kpi { padding: 14px; }
   .kpi-valor { font-size: 22px; }
-  .painel { padding: 16px; }
+  .grade-2 { gap: 14px; }
+  .painel { padding: 16px; gap: 12px; }
+  .card { padding: 14px; }
+  .linha { padding: 10px; gap: 10px; }
+  .filtros { gap: 6px; }
+  .modal { padding: 16px; max-height: 92vh; }
   .botao { min-height: 44px; }
   .busca, .campo input, .campo select, .campo textarea { font-size: 16px; }
 }
