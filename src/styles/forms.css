@@ -477,6 +477,60 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
 }
 .aviso-erro { background: var(--red); color: #fff; bottom: 76px; }
 
+/* Celular: barra de navegação com os 4 ícones, tema e sair no topo, cards e botões mais confortáveis */
+@media (max-width: 760px) {
+  .conteudo { padding: 68px 14px 110px; }
+
+  div.shell .usuario-bloco {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 45;
+    display: flex;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+  aside.side .usuario-bloco .side-acao {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--panel);
+    box-shadow: 0 8px 20px -10px rgba(1, 16, 84, 0.3);
+  }
+  aside.side .usuario-bloco .side-acao .btn-rotulo { display: none; }
+  aside.side .usuario-bloco .side-acao svg { width: 18px; height: 18px; }
+
+  aside.side .nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+  }
+  aside.side .nav-btn {
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    height: 58px;
+    padding: 0 2px;
+    font-size: 11px;
+    font-weight: 500;
+    border-radius: 14px;
+  }
+  aside.side .nav-btn > span:not(.nav-marca) { display: inline; }
+  aside.side .nav-marca { width: 34px; height: 26px; border-radius: 10px; background: transparent; }
+  aside.side .nav-marca svg { width: 20px; height: 20px; }
+
+  .kpi { padding: 14px; }
+  .kpi-valor { font-size: 22px; }
+  .painel { padding: 16px; }
+  .botao { min-height: 44px; }
+  .busca, .campo input, .campo select, .campo textarea { font-size: 16px; }
+}
+
 /* Textos de ajuda e avisos */
 .ajuda { font-size: 13px; color: var(--muted); }
 .aviso-texto { color: var(--amber); font-weight: 700; }
