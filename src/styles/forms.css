@@ -384,7 +384,8 @@ div.shell { grid-template-columns: 272px 1fr; }
 div.shell.shell-recolhida { grid-template-columns: 108px 1fr; }
 aside.side {
   top: 16px;
-  height: calc(100vh - 32px);
+  align-self: start;
+  height: auto;
   margin: 16px 0 16px 16px;
   padding: 20px 14px;
   border-radius: 24px;
@@ -442,6 +443,12 @@ aside.side .side-acao:active { transform: scale(0.98); }
 aside.side .side-acao.perigo:hover { color: var(--red); }
 .shell-recolhida aside.side .side-acao { justify-content: center; padding: 10px 0; }
 .shell-recolhida aside.side .nav-btn { justify-content: center; }
+.shell-recolhida aside.side { padding: 14px 10px; }
+.shell-recolhida aside.side .nav { gap: 4px; }
+.shell-recolhida aside.side .marca { justify-content: center; padding: 0; }
+.shell-recolhida aside.side .marca .marca-logo { display: none; }
+.shell-recolhida aside.side .usuario-bloco { gap: 6px; }
+aside.side .nav-marca svg { width: 18px; height: 18px; }
 
 @media (max-width: 760px) {
   div.shell, div.shell.shell-recolhida { grid-template-columns: 1fr; }

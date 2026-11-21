@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Pagina } from "./core/types";
 import { useDados } from "./core/store";
 import { encerrarSessao, sessaoAtual, type Usuario } from "./core/auth";
@@ -9,11 +9,56 @@ import { Diaristas } from "./features/diaristas/Diaristas";
 import { Lojas } from "./features/lojas/Lojas";
 import { Financeiro } from "./features/financeiro/Financeiro";
 
-const PAGINAS: { id: Pagina; rotulo: string; marca: string }[] = [
-  { id: "painel", rotulo: "Painel", marca: "P" },
-  { id: "diaristas", rotulo: "Diaristas", marca: "D" },
-  { id: "lojas", rotulo: "Lojas", marca: "L" },
-  { id: "financeiro", rotulo: "Financeiro", marca: "F" },
+const ICONE_BASE = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
+
+const PAGINAS: { id: Pagina; rotulo: string; icone: ReactNode }[] = [
+  {
+    id: "painel",
+    rotulo: "Painel",
+    icone: (
+      <svg {...ICONE_BASE}>
+        <rect x="3" y="3" width="7" height="9" rx="2" />
+        <rect x="14" y="3" width="7" height="5" rx="2" />
+        <rect x="14" y="12" width="7" height="9" rx="2" />
+        <rect x="3" y="16" width="7" height="5" rx="2" />
+      </svg>
+    ),
+  },
+  {
+    id: "diaristas",
+    rotulo: "Diaristas",
+    icone: (
+      <svg {...ICONE_BASE}>
+        <circle cx="9" cy="8" r="4" />
+        <path d="M2 21c0-3.5 3-6 7-6s7 2.5 7 6" />
+        <path d="M16 4.5a4 4 0 0 1 0 7" />
+        <path d="M22 21c0-2.8-1.7-5-4.5-5.7" />
+      </svg>
+    ),
+  },
+  {
+    id: "lojas",
+    rotulo: "Lojas",
+    icone: (
+      <svg {...ICONE_BASE}>
+        <path d="M3 9l1.5-5h15L21 9" />
+        <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+        <path d="M4.5 12v8h15v-8" />
+        <path d="M10 20v-4h4v4" />
+      </svg>
+    ),
+  },
+  {
+    id: "financeiro",
+    rotulo: "Financeiro",
+    icone: (
+      <svg {...ICONE_BASE}>
+        <rect x="2.5" y="6" width="19" height="13" rx="3" />
+        <path d="M16 12.5h2.5" />
+        <path d="M6 6V5a2 2 0 0 1 2-2h8.5" />
+      </svg>
+    ),
+  },
 ];
 
 export function App() {
@@ -86,7 +131,7 @@ type AreaProps = { usuario: Usuario; sair: () => void; tema: "claro" | "escuro";
 function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
   const { dados, setDados, carregado, erroSync } = useDados(usuario.id);
   const [pagina, setPagina] = useState<Pagina>("painel");
-  const [recolhida, setRecolhida] = useState(false);
+  const [recolhida, setRecolhida] = useState(true);
   const [aviso, setAviso] = useState<{ texto: string; id: number } | null>(null);
 
   const indice = PAGINAS.findIndex((p) => p.id === pagina);
@@ -139,7 +184,7 @@ function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
               aria-current={pagina === p.id ? "page" : undefined}
               onClick={() => setPagina(p.id)}
             >
-              <span className="nav-marca">{p.marca}</span>
+              <span className="nav-marca">{p.icone}</span>
               <span>{p.rotulo}</span>
             </button>
           ))}
