@@ -1,0 +1,438 @@
+/* ===== Formulários por seções ===== */
+.form { gap: 18px; }
+
+.secao {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--hover-soft);
+  border-radius: 16px;
+  background: var(--field-soft);
+  min-width: 0;
+}
+.secao legend {
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--cyan);
+}
+
+.grade-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+.span-2 { grid-column: span 2; }
+@media (max-width: 560px) {
+  .span-2 { grid-column: auto; }
+}
+
+.rotulo { font-size: 13px; font-weight: 700; color: var(--muted); }
+
+/* Chips de seleção múltipla */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 7px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), background 0.25s, color 0.25s, border-color 0.25s;
+}
+.chip:hover { color: var(--ink); border-color: var(--pink); }
+.chip:active { transform: scale(0.94); }
+.chip.ativo { background: var(--pink); border-color: var(--pink); color: #fff; }
+.chip:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+/* Interruptores lado a lado */
+.toggles { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+
+/* Horários de disponibilidade */
+.disp-lista { display: grid; gap: 10px; }
+.disp-linha {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+  animation: subir 0.35s var(--ease) both;
+}
+.disp-linha select,
+.disp-linha input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+}
+.disp-linha select:focus-visible,
+.disp-linha input:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.disp-remover {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(251, 113, 133, 0.15);
+  color: var(--red);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s var(--ease), background 0.25s;
+}
+.disp-remover:hover { background: rgba(251, 113, 133, 0.3); transform: scale(1.06); }
+.botao.pequeno { padding: 9px 14px; font-size: 14px; justify-self: start; }
+@media (max-width: 560px) {
+  .disp-linha { grid-template-columns: 1fr 1fr; }
+  .disp-linha select { grid-column: span 2; }
+}
+
+/* Status e badges */
+.status { font-size: 12px; font-weight: 800; }
+.status.pago { color: var(--lime); }
+.status.pendente { color: var(--amber); }
+
+.selo.pink { background: var(--pink); color: #fff; }
+.selo.amber { background: var(--amber); }
+.selo.vermelho { background: var(--red); color: #fff; }
+
+/* Filtros em duas linhas */
+.filtros { display: grid; gap: 8px; }
+.filtro-linha { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.filtro-linha > span { font-size: 12px; font-weight: 700; color: var(--muted); margin-right: 4px; }
+
+/* Tabela de lojas */
+.tabela-wrap { overflow-x: auto; border-radius: 14px; }
+.tabela { width: 100%; border-collapse: collapse; }
+.tabela th,
+.tabela td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--linha);
+  vertical-align: middle;
+}
+.tabela th {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.tabela tbody tr { transition: background 0.2s; }
+.tabela tbody tr:hover { background: var(--panel-2); }
+.tabela-acoes { white-space: nowrap; }
+.tabela-acoes .link + .link { margin-left: 12px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Cards de cor vermelha */
+.kpi-red { color: var(--red); }
+.kpi-blue { color: #3b82f6; }
+.kpi-orange { color: #f97316; }
+
+/* Lista de quantidades dentro de um card */
+.kpi-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; color: var(--ink); }
+
+/* Texto da mensagem pronta */
+.mensagem-pronta {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+  color: var(--ink);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Três opções lado a lado */
+.segmento.segmento-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 3px; }
+.segmento-3 .segmento-btn {
+  font-size: 12px;
+  line-height: 1.15;
+  padding: 6px 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 40px;
+}
+
+/* Barra lateral recolhida: só os ícones */
+.shell { transition: grid-template-columns 0.3s var(--ease); }
+.shell.shell-recolhida { grid-template-columns: 76px 1fr; }
+
+.marca { justify-content: space-between; }
+.side-toggle {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  background: var(--hover-soft);
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s var(--ease);
+}
+.side-toggle:hover { background: var(--line-strong); }
+.side-toggle:active { transform: scale(0.92); }
+.side-toggle:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+
+.shell-recolhida .side { padding: 24px 12px; overflow: hidden; }
+.shell-recolhida .marca { flex-direction: column; gap: 10px; padding: 0; }
+.shell-recolhida .marca-nome,
+.shell-recolhida .btn-rotulo,
+.shell-recolhida .nav-btn > span:not(.nav-marca) { display: none; }
+.shell-recolhida .usuario-bloco { padding: 8px; gap: 8px; }
+.shell-recolhida .usuario-bloco .botao { padding: 8px 0; justify-content: center; }
+.shell-recolhida .nav-btn { justify-content: center; padding: 0; }
+.shell-recolhida .nav-btn:hover { transform: none; }
+
+@media (max-width: 760px) {
+  .side-toggle { display: none; }
+  .shell-recolhida { grid-template-columns: 1fr; }
+  .shell-recolhida .nav-btn > span:not(.nav-marca) { display: inline; }
+}
+
+/* Dois cards lado a lado */
+.kpis-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+/* Botão pequeno e quadrado, usado dentro de cards */
+.botao.mini { padding: 8px 12px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
+
+/* Tabela de diaristas */
+.tabela-diaristas td { font-size: 14px; }
+.nowrap { white-space: nowrap; }
+.selo-pequeno { font-size: 11px; padding: 3px 8px; }
+
+/* Janela de cadastro */
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.45);
+  animation: fundoEntra 0.25s ease both;
+}
+.modal {
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--linha);
+  box-shadow: 0 40px 80px -30px rgba(15, 23, 42, 0.25);
+  animation: modalEntra 0.35s var(--ease) both;
+}
+.modal-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.modal-fechar {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--hover-soft);
+  color: var(--ink);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s var(--ease);
+}
+.modal-fechar:hover { background: rgba(251, 113, 133, 0.25); transform: rotate(90deg); }
+@keyframes fundoEntra { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalEntra { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+/* Grade de 3 colunas no formulário da diarista */
+.grade-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.grade-3 .span-2 { grid-column: span 2; }
+.grade-3 .span-3 { grid-column: 1 / -1; }
+@media (max-width: 560px) {
+  .grade-3 { grid-template-columns: 1fr; }
+  .grade-3 .span-2, .grade-3 .span-3 { grid-column: auto; }
+}
+
+/* Botão + quadrado para cadastrar setor */
+.botao.mais {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  justify-self: start;
+}
+
+/* Linha de horário: dia, início, fim e remover */
+.disp-topo-3 { grid-template-columns: 1.2fr 1fr 1fr auto; }
+
+/* Bloco de horário (versão anterior, mantida por compatibilidade) */
+.disp-bloco {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--hover-soft);
+  animation: subir 0.35s var(--ease) both;
+}
+.disp-topo {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.disp-topo select,
+.disp-topo input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+}
+.disp-topo select:focus-visible,
+.disp-topo input:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .disp-topo { grid-template-columns: 1fr 1fr; }
+  .disp-topo select { grid-column: span 2; }
+}
+
+/* Formulário em janela: espaçamento entre seções e rodapé */
+.form { display: grid; gap: 18px; }
+.form .acoes { margin-top: 6px; padding-top: 4px; }
+
+/* Cabeçalho de seção com botão à direita */
+.linha-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Botão verde quadrado no canto superior direito */
+.botao.mais.verde { background: var(--lime); color: #fff; }
+
+/* Cards coloridos por inteiro, com brilho neon embaixo ao passar o mouse */
+/* Cores dos cards fixas, iguais nos dois temas */
+.kpi-blue { --acc: #2563eb; }
+.kpi-pink { --acc: #db2777; }
+.kpi-lime { --acc: #16a34a; }
+.kpi-amber { --acc: #d97706; }
+.kpi-orange { --acc: #ea580c; }
+.kpi-cyan { --acc: #0891b2; }
+.kpi-red { --acc: #dc2626; }
+/* Seletores com mais especificidade: o index.css é carregado depois e tem regras com o mesmo nome.
+   O texto dos cards é sempre branco, porque as cores dos cards são fixas nos dois temas. */
+article.kpi {
+  background: var(--acc);
+  color: #fff;
+  border: 0;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s;
+}
+article.kpi::after { display: none; }
+article.kpi .kpi-rotulo,
+article.kpi .kpi-valor,
+article.kpi .kpi-lista { color: #fff; }
+article.kpi .kpi-rotulo { opacity: 0.9; }
+article.kpi:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 36px -10px var(--acc);
+}
+
+/* Botão de tema */
+.tema-toggle { font-size: 16px; }
+
+/* Identidade visual: barra lateral escura da marca e logo */
+aside.side {
+  background:
+    radial-gradient(140% 55% at 0% 0%, rgba(219, 39, 119, 0.22), transparent 60%),
+    linear-gradient(180deg, #0f1733 0%, #080d20 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+aside.side .marca-nome { color: #fff; font-weight: 600; font-size: 15px; line-height: 1.25; }
+aside.side .nav-btn { color: #b7bfe0; font-weight: 500; }
+aside.side .nav-btn:hover,
+aside.side .nav-btn.ativo { color: #fff; }
+aside.side .nav-marca { background: rgba(255, 255, 255, 0.08); color: #d7dcf5; }
+aside.side .side-toggle { background: rgba(255, 255, 255, 0.08); color: #e6eaff; }
+aside.side .side-toggle:hover { background: rgba(255, 255, 255, 0.16); }
+aside.side .usuario-bloco { background: transparent; padding: 0; }
+aside.side .usuario-bloco .botao.secundario { background: rgba(255, 255, 255, 0.08); color: #e6eaff; font-weight: 500; }
+aside.side .usuario-bloco .botao.secundario:hover { background: rgba(255, 255, 255, 0.16); }
+.marca-logo { height: 36px; width: auto; flex: none; display: block; }
+.auth-logo { height: 62px; width: auto; display: block; margin: 0 auto; }
+
+/* Telas de carregamento e aviso de erro de sincronização */
+.carregando {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-weight: 500;
+}
+.aviso-erro { background: var(--red); color: #fff; bottom: 76px; }
+
+/* Textos de ajuda e avisos */
+.ajuda { font-size: 13px; color: var(--muted); }
+.aviso-texto { color: var(--amber); font-weight: 700; }
+
+/* Campos calculados ou fixos (somente leitura) */
+.campo-calculado {
+  background: rgba(34, 211, 238, 0.08) !important;
+  border-color: rgba(34, 211, 238, 0.35) !important;
+  color: var(--cyan) !important;
+  font-weight: 800;
+  cursor: default;
+}
+
+/* Dia adicionado a um chip, com botão de remover */
+.chip-dia { display: inline-flex; align-items: center; gap: 6px; cursor: default; }
+.chip-x {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+/* Bloco de dias trabalhados: rótulo, linha de adicionar, lista de dias */
+.dias-bloco { display: grid; gap: 10px; }
+
+/* Adicionar dia: data ocupa o espaço e o botão fica ao lado */
+.dia-adicionar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.dia-adicionar input {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: var(--field);
+}
+.dia-adicionar .botao { flex: none; }
+
+/* Disponibilidade com dia, turno, início e fim */
+.disp-linha-4 { grid-template-columns: 1fr 1fr 1fr 1fr auto; }
+@media (max-width: 760px) {
+  .disp-linha-4 { grid-template-columns: 1fr 1fr; }
+}
