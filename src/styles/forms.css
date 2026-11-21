@@ -483,11 +483,13 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
 
 /* Celular: barra de navegação com os 4 ícones, tema e sair no topo, cards e botões mais confortáveis */
 @media (max-width: 760px) {
-  .conteudo { padding: 68px 14px 110px; }
+  .conteudo {
+    padding: calc(68px + env(safe-area-inset-top, 0px)) 14px calc(110px + env(safe-area-inset-bottom, 0px));
+  }
 
   div.shell .usuario-bloco {
     position: fixed;
-    top: 12px;
+    top: calc(12px + env(safe-area-inset-top, 0px));
     right: 12px;
     z-index: 45;
     display: flex;
@@ -541,6 +543,8 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
   .linha { padding: 10px; gap: 10px; }
   .filtros { gap: 6px; }
   .modal { padding: 16px; max-height: 92vh; }
+  .modal-fundo { padding: calc(10px + env(safe-area-inset-top, 0px)) 10px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .aviso { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); right: 12px; left: 12px; text-align: center; }
   .botao { min-height: 44px; }
   .busca, .campo input, .campo select, .campo textarea { font-size: 16px; }
 }
