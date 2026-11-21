@@ -462,7 +462,12 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
     padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
   }
   aside.side .nav-btn { flex-direction: column; }
-  aside.side .nav-btn.ativo { background: linear-gradient(90deg, #0154f8, #030f79); }
+  aside.side .nav-btn.ativo,
+  aside.side .nav-btn.ativo:hover,
+  aside.side .nav-btn.ativo:focus-visible {
+    background: linear-gradient(90deg, #0154f8, #030f79);
+    color: #fff;
+  }
 }
 .auth-logo { height: 62px; width: auto; display: block; margin: 0 auto; }
 
