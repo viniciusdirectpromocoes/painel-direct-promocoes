@@ -51,7 +51,7 @@ export function Entrar({ aoEntrar }: Props) {
     <main className="auth">
       <section className="auth-cartao rise">
         <div className="auth-marca">
-          <img src="/logo-direct.png" alt="Direct Promoções" className="auth-logo" />
+          <img src="/logo-direct-original.png" alt="Direct Promoções" className="auth-logo" />
           <h1>Painel Direct Promoções</h1>
           <p className="muted">Diaristas, lojas e financeiro num só lugar.</p>
         </div>

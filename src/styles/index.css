@@ -1,14 +1,16 @@
 :root {
-  --bg: #f4f6fb;
+  --bg: #f2f5fc;
   --panel: #ffffff;
-  --panel-2: #f1f4fa;
-  --field: #f8fafc;
-  --field-soft: #f5f7fb;
-  --linha: rgba(15, 23, 42, 0.08);
-  --line-strong: rgba(15, 23, 42, 0.14);
-  --hover-soft: rgba(15, 23, 42, 0.05);
-  --ink: #0f172a;
-  --muted: #5b6478;
+  --panel-2: #f9fafd;
+  --field: #f9fafd;
+  --field-soft: #f2f5fc;
+  --linha: rgba(1, 16, 84, 0.08);
+  --line-strong: rgba(1, 16, 84, 0.14);
+  --hover-soft: rgba(1, 16, 84, 0.05);
+  --ink: #011054;
+  --muted: #5a6683;
+  --brand: #0154f8;
+  --brand-dark: #030f79;
   --pink: #db2777;
   --cyan: #0891b2;
   --lime: #16a34a;
@@ -24,23 +26,25 @@
   --side-bg: rgba(255, 255, 255, 0.8);
   --side-bg-mobile: rgba(255, 255, 255, 0.96);
   color-scheme: light;
-  font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  font-family: "Lato", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 /* Tema escuro (ativado pelo botão da barra lateral) */
 :root[data-theme="dark"] {
-  --bg: #0b0a1e;
-  --panel: #161335;
-  --panel-2: #1f1a47;
-  --field: #0f0d26;
-  --field-soft: #14122e;
-  --linha: rgba(255, 255, 255, 0.07);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --bg: #010a3a;
+  --panel: #061a5c;
+  --panel-2: #0a2270;
+  --field: #041550;
+  --field-soft: #071c5f;
+  --linha: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
   --hover-soft: rgba(255, 255, 255, 0.05);
-  --ink: #f5f3ff;
-  --muted: #a9a5d1;
+  --ink: #e8eefa;
+  --muted: #9fb0d6;
+  --brand: #3d7dff;
+  --brand-dark: #030f79;
   --pink: #ff3d8b;
   --cyan: #22d3ee;
   --lime: #a3e635;
@@ -442,7 +446,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .botao:active { transform: scale(0.97); }
 .botao.primario {
   color: #fff;
-  background: var(--lime);
+  background: var(--brand);
   box-shadow: 0 10px 24px -10px rgba(22, 163, 74, 0.6);
 }
 .botao.primario:hover { box-shadow: 0 16px 30px -10px rgba(22, 163, 74, 0.7); }

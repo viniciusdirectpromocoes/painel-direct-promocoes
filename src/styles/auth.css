@@ -39,7 +39,9 @@
     linear-gradient(180deg, #0f1733 0%, #080d20 100%);
 }
 .auth-cartao .auth-marca h1 { color: #fff; font-size: 22px; font-weight: 600; }
-.auth-cartao .auth-marca .muted { color: #b7bfe0; }
+.auth-cartao .auth-marca .muted { color: var(--muted); }
+.auth-cartao .auth-marca { background: none; padding: 8px 0 0; }
+.auth-cartao .auth-marca h1 { color: var(--ink); }
 
 .usuario-bloco {
   margin-top: auto;
