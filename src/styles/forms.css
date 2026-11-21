@@ -395,7 +395,7 @@ aside.side {
 }
 aside.side .marca { padding: 0 4px; }
 aside.side .marca-nome { color: var(--ink); font-weight: 600; font-size: 14px; line-height: 1.25; }
-aside.side .nav { gap: 6px; }
+aside.side .nav { gap: 8px; }
 aside.side .nav-ind {
   background: linear-gradient(90deg, #0154f8, #030f79);
   box-shadow: 0 10px 24px -12px rgba(1, 84, 248, 0.6);
@@ -444,7 +444,6 @@ aside.side .side-acao.perigo:hover { color: var(--red); }
 .shell-recolhida aside.side .side-acao { justify-content: center; padding: 10px 0; }
 .shell-recolhida aside.side .nav-btn { justify-content: center; }
 .shell-recolhida aside.side { padding: 14px 10px; }
-.shell-recolhida aside.side .nav { gap: 4px; }
 .shell-recolhida aside.side .marca { justify-content: center; padding: 0; }
 .shell-recolhida aside.side .marca .marca-logo { display: none; }
 .shell-recolhida aside.side .usuario-bloco { gap: 6px; }
