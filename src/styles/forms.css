@@ -363,7 +363,7 @@ article.kpi:hover {
 /* Identidade visual: barra lateral escura da marca e logo */
 aside.side {
   background:
-    radial-gradient(140% 55% at 0% 0%, rgba(219, 39, 119, 0.22), transparent 60%),
+    radial-gradient(140% 55% at 100% 0%, rgba(37, 99, 235, 0.2), transparent 60%),
     linear-gradient(180deg, #0f1733 0%, #080d20 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
