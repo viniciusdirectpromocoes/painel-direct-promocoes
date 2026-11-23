@@ -210,6 +210,19 @@
 /* Dois cards lado a lado */
 .kpis-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
+/* A mesma paleta de cards nos temas claro e escuro. */
+:root {
+  --card-azul: #0154f8;
+  --card-verde: #22d65e;
+  --card-laranja: #ff850a;
+  --card-roxo: #7828f5;
+  --card-rosa: #df0879;
+  --card-ciano: #19cfee;
+  --card-vermelho: #e60026;
+  --card-amarelo: #ffdc23;
+  --card-texto-escuro: #0d1a29;
+}
+
 .lojas-redes {
   list-style: none;
   display: grid;
@@ -224,17 +237,17 @@
   gap: 4px;
   padding: 11px 14px;
   border-radius: 12px;
-  color: #fff;
-  background: #1d4ed8;
+  color: var(--rede-texto, #fff);
+  background: var(--rede-cor, var(--card-azul));
   overflow-wrap: anywhere;
 }
 .lojas-rede strong { font-size: 14px; }
 .lojas-rede span { font-size: 13px; }
-.lojas-rede:nth-child(6n + 2) { background: #047857; }
-.lojas-rede:nth-child(6n + 3) { background: #a33c0b; }
-.lojas-rede:nth-child(6n + 4) { background: #6d28d9; }
-.lojas-rede:nth-child(6n + 5) { background: #be185d; }
-.lojas-rede:nth-child(6n + 6) { background: #0e7490; }
+.lojas-rede:nth-child(6n + 2) { --rede-cor: var(--card-verde); --rede-texto: var(--card-texto-escuro); }
+.lojas-rede:nth-child(6n + 3) { --rede-cor: var(--card-laranja); --rede-texto: var(--card-texto-escuro); }
+.lojas-rede:nth-child(6n + 4) { --rede-cor: var(--card-roxo); }
+.lojas-rede:nth-child(6n + 5) { --rede-cor: var(--card-rosa); }
+.lojas-rede:nth-child(6n + 6) { --rede-cor: var(--card-ciano); --rede-texto: var(--card-texto-escuro); }
 .loja-cel-endereco { overflow-wrap: anywhere; }
 .loja-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; }
 .loja-acoes .link { text-align: left; }
@@ -514,29 +527,28 @@
 
 /* Cards coloridos por inteiro, com brilho neon embaixo ao passar o mouse */
 /* Cores dos cards fixas, iguais nos dois temas */
-.kpi-blue { --acc: #2563eb; }
-.kpi-pink { --acc: #db2777; }
-.kpi-lime { --acc: #16a34a; }
-.kpi-amber { --acc: #d97706; }
-.kpi-orange { --acc: #ea580c; }
-.kpi-cyan { --acc: #0891b2; }
-.kpi-red { --acc: #dc2626; }
-/* Seletores com mais especificidade: o index.css é carregado depois e tem regras com o mesmo nome.
-   O texto dos cards é sempre branco, porque as cores dos cards são fixas nos dois temas. */
+.kpi-blue { --acc: var(--card-azul); }
+.kpi-pink { --acc: var(--card-rosa); }
+.kpi-lime { --acc: var(--card-verde); --acc-ink: var(--card-texto-escuro); }
+.kpi-amber { --acc: var(--card-amarelo); --acc-ink: var(--card-texto-escuro); }
+.kpi-orange { --acc: var(--card-laranja); --acc-ink: var(--card-texto-escuro); }
+.kpi-cyan { --acc: var(--card-ciano); --acc-ink: var(--card-texto-escuro); }
+.kpi-red { --acc: var(--card-vermelho); }
+/* Mantém a prioridade sobre os estilos-base do index.css. */
 article.kpi {
   background: var(--acc);
-  color: #fff;
+  color: var(--acc-ink, #fff);
   border: 0;
   transition: transform 0.3s var(--ease), box-shadow 0.3s;
 }
 article.kpi::after { display: none; }
 article.kpi .kpi-rotulo,
 article.kpi .kpi-valor,
-article.kpi .kpi-lista { color: #fff; }
-article.kpi .kpi-rotulo { opacity: 0.9; }
+article.kpi .kpi-lista,
+article.kpi .painel-kpi-detalhe { color: var(--acc-ink, #fff); }
 main .kpis.painel-resumo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .painel-resumo .kpi-valor { overflow-wrap: anywhere; }
-.painel-kpi-detalhe { color: #fff; font-size: 12px; line-height: 1.35; }
+.painel-kpi-detalhe { font-size: 12px; line-height: 1.35; }
 main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .painel-secoes .linha > :last-child { flex-shrink: 0; }
 .pedido-form { display: grid; gap: 14px; }
@@ -592,10 +604,10 @@ main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .operacao-valor dt { font-size: 11px; }
 .operacao-valor dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
-.operacao-valor.receber { background: #a8430c; }
-.operacao-valor.repasse { background: #b91c1c; }
-.operacao-valor.lucro { background: #087848; }
-.operacao-valor.margem { background: #facc15; color: #352a09; }
+.operacao-valor.receber { background: var(--card-laranja); color: var(--card-texto-escuro); }
+.operacao-valor.repasse { background: var(--card-vermelho); }
+.operacao-valor.lucro { background: var(--card-verde); color: var(--card-texto-escuro); }
+.operacao-valor.margem { background: var(--card-amarelo); color: var(--card-texto-escuro); }
 .operacao-setores {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
