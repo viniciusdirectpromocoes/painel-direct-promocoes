@@ -135,17 +135,19 @@ export function Lojas({ dados, setDados, notificar }: Props) {
         <article className="kpi kpi-lime rise" style={{ animationDelay: "60ms" }}>
           <span className="kpi-rotulo">Lojas</span>
           <strong className="kpi-valor"><AnimatedNumber value={totalLojas} format={(n) => Math.round(n).toString()} /></strong>
-          {lojasPorRede.length > 0 && (
-            <ul className="kpi-lista">
-              {lojasPorRede.map(([rede, qtd]) => (
-                <li key={rede}>
-                  {rede}: <strong>{qtd}</strong>
-                </li>
-              ))}
-            </ul>
-          )}
         </article>
       </div>
+
+      {lojasPorRede.length > 0 && (
+        <ul className="lojas-redes rise" aria-label="Quantidade de lojas por rede">
+          {lojasPorRede.map(([rede, qtd]) => (
+            <li key={rede} className="lojas-rede">
+              <strong>{rede}</strong>
+              <span>{qtd} {qtd === 1 ? "loja" : "lojas"}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <section className="painel rise" style={{ animationDelay: "120ms" }}>
         <div className="painel-topo">

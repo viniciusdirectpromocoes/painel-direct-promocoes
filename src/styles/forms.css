@@ -210,6 +210,32 @@
 /* Dois cards lado a lado */
 .kpis-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 
+.lojas-redes {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  gap: 10px;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.lojas-rede {
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  color: #fff;
+  background: #1d4ed8;
+  overflow-wrap: anywhere;
+}
+.lojas-rede strong { font-size: 14px; }
+.lojas-rede span { font-size: 13px; }
+.lojas-rede:nth-child(6n + 2) { background: #047857; }
+.lojas-rede:nth-child(6n + 3) { background: #a33c0b; }
+.lojas-rede:nth-child(6n + 4) { background: #6d28d9; }
+.lojas-rede:nth-child(6n + 5) { background: #be185d; }
+.lojas-rede:nth-child(6n + 6) { background: #0e7490; }
+
 /* Botão pequeno e quadrado, usado dentro de cards */
 .botao.mini { padding: 8px 12px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
 
