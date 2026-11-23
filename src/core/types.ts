@@ -44,8 +44,20 @@ export type Pedido = {
   datas?: string[];
   horaInicio?: string;
   horaFim?: string;
+  intervaloInicio?: string;
+  intervaloFim?: string;
   diaristaId?: string;
 };
+
+export type Jornada = {
+  horaInicio: string;
+  horaFim: string;
+  intervaloInicio: string;
+  intervaloFim: string;
+};
+
+export type TarifaRede = { rede: string; recebe: number; paga: number };
+export type TarifaSetor = { setor: string; paga: number; rede?: string };
 
 /**
  * Diárias: o que a diarista trabalhou e o quanto deve receber.
@@ -86,8 +98,11 @@ export type Dados = {
   pedidos: Pedido[];
   lancamentos: Lancamento[];
   setoresExtras: string[]; // setores cadastrados pelo usuário, além dos padrões
+  tarifasRedes: TarifaRede[];
+  tarifasSetores: TarifaSetor[];
+  jornadas: Record<string, Jornada>;
 };
 
-export type Pagina = "painel" | "diaristas" | "lojas" | "pedidos" | "financeiro";
+export type Pagina = "painel" | "diaristas" | "lojas" | "pedidos" | "operacao" | "financeiro";
 
 export type SetDados = Dispatch<SetStateAction<Dados>>;

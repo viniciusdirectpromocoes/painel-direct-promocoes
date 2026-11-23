@@ -8,6 +8,7 @@ import { Painel } from "./features/painel/Painel";
 import { Diaristas } from "./features/diaristas/Diaristas";
 import { Lojas } from "./features/lojas/Lojas";
 import { Pedidos } from "./features/pedidos/Pedidos";
+import { Operacao } from "./features/operacao/Operacao";
 import { Financeiro } from "./features/financeiro/Financeiro";
 
 const ICONE_BASE = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
@@ -57,6 +58,18 @@ const PAGINAS: { id: Pagina; rotulo: string; icone: ReactNode }[] = [
         <rect x="5" y="5" width="14" height="16" rx="2" />
         <rect x="8.5" y="3" width="7" height="4" rx="1" />
         <path d="M9 11h6m-6 5h6" />
+      </svg>
+    ),
+  },
+  {
+    id: "operacao",
+    rotulo: "Operação",
+    icone: (
+      <svg {...ICONE_BASE}>
+        <path d="M4 6h16M4 12h16M4 18h16" />
+        <circle cx="8" cy="6" r="2" fill="var(--panel)" />
+        <circle cx="15" cy="12" r="2" fill="var(--panel)" />
+        <circle cx="10" cy="18" r="2" fill="var(--panel)" />
       </svg>
     ),
   },
@@ -121,7 +134,7 @@ export function App() {
   }
 
   if (!usuario) {
-    return <Entrar aoEntrar={setUsuario} />;
+    return <Entrar aoEntrar={setUsuario} tema={tema} />;
   }
 
   return (
@@ -166,7 +179,7 @@ function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
     <div className={`shell ${recolhida ? "shell-recolhida" : ""}`}>
       <aside className="side">
         <div className="marca">
-          <img src={tema === "escuro" ? "/logo-direct.png" : "/logo-direct-original.png"} alt="Direct Promoções" className="marca-logo" />
+          <img src={tema === "escuro" ? "/direct-assinatura-branca.png" : "/direct-assinatura.png"} alt="Direct Promoções" className="marca-logo" />
           <span className="marca-nome">Painel Direct Promoções</span>
           <button
             type="button"
@@ -238,6 +251,7 @@ function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
         {pagina === "diaristas" && <Diaristas dados={dados} setDados={setDados} notificar={notificar} />}
         {pagina === "lojas" && <Lojas dados={dados} setDados={setDados} notificar={notificar} />}
         {pagina === "pedidos" && <Pedidos dados={dados} setDados={setDados} notificar={notificar} />}
+        {pagina === "operacao" && <Operacao dados={dados} setDados={setDados} notificar={notificar} />}
         {pagina === "financeiro" && <Financeiro dados={dados} setDados={setDados} notificar={notificar} />}
       </main>
 

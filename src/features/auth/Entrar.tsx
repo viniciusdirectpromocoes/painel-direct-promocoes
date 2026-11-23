@@ -2,9 +2,9 @@ import { useState, type FormEvent } from "react";
 import { cadastrar, entrar, type Usuario } from "../../core/auth";
 import "../../styles/auth.css";
 
-type Props = { aoEntrar: (usuario: Usuario) => void };
+type Props = { aoEntrar: (usuario: Usuario) => void; tema: "claro" | "escuro" };
 
-export function Entrar({ aoEntrar }: Props) {
+export function Entrar({ aoEntrar, tema }: Props) {
   const [modo, setModo] = useState<"entrar" | "cadastrar">("entrar");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
@@ -51,7 +51,7 @@ export function Entrar({ aoEntrar }: Props) {
     <main className="auth">
       <section className="auth-cartao rise">
         <div className="auth-marca">
-          <img src="/logo-direct-original.png" alt="Direct Promoções" className="auth-logo" />
+          <img src={tema === "escuro" ? "/direct-assinatura-branca.png" : "/direct-assinatura.png"} alt="Direct Promoções" className="auth-logo" />
           <h1>Painel Direct Promoções</h1>
           <p className="muted">Diaristas, lojas e financeiro num só lugar.</p>
         </div>

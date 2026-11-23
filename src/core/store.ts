@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import type { Dados } from "./types";
 import { supabase } from "./supabase";
 
-const VAZIO: Dados = { diaristas: [], lojas: [], pedidos: [], lancamentos: [], setoresExtras: [] };
+const VAZIO: Dados = {
+  diaristas: [], lojas: [], pedidos: [], lancamentos: [], setoresExtras: [],
+  tarifasRedes: [], tarifasSetores: [], jornadas: {},
+};
 
 /**
  * Dados de um usuário, guardados no Supabase (tabela painel_dados).
