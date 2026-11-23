@@ -170,10 +170,10 @@ export function Lojas({ dados, setDados, notificar }: Props) {
         ) : lista.length === 0 ? (
           <p className="vazio">Nada encontrado para "{busca}".</p>
         ) : (
-          <div className="tabela-wrap">
-            <table className="tabela">
-              <thead>
-                <tr>
+          <div className="tabela-wrap tabela-lojas-wrap" role="region" aria-label="Lista de lojas" tabIndex={0}>
+            <table className="tabela tabela-lojas" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
                   <th scope="col">Rede</th>
                   <th scope="col">Loja</th>
                   <th scope="col">Endereço</th>
@@ -182,27 +182,24 @@ export function Lojas({ dados, setDados, notificar }: Props) {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {lista.map((l) => (
-                  <tr key={l.id}>
-                    <td>{l.rede}</td>
-                    <td>
+                  <tr key={l.id} role="row">
+                    <td role="cell" className="loja-cel-rede">{l.rede}</td>
+                    <td role="cell" className="loja-cel-nome">
                       <strong>{l.nome}</strong>
                     </td>
-                    <td>
+                    <td role="cell" className="loja-cel-endereco">
                       {l.endereco}
-                      <br />
-                      <button type="button" className="link" onClick={() => setMensagemDe(l)}>
-                        Mensagem para o diarista
-                      </button>
                     </td>
-                    <td className="tabela-acoes">
-                      <button type="button" className="link" onClick={() => editar(l)}>
-                        Editar
-                      </button>
-                      <button type="button" className="link perigo" onClick={() => excluir(l)}>
-                        Excluir
-                      </button>
+                    <td role="cell" className="loja-cel-acoes">
+                      <div className="loja-acoes">
+                        <button type="button" className="link" onClick={() => setMensagemDe(l)}>
+                          Mensagem para o diarista
+                        </button>
+                        <button type="button" className="link" onClick={() => editar(l)}>Editar</button>
+                        <button type="button" className="link perigo" onClick={() => excluir(l)}>Excluir</button>
+                      </div>
                     </td>
                   </tr>
                 ))}
