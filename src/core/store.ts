@@ -3,7 +3,7 @@ import type { Dados } from "./types";
 import { supabase } from "./supabase";
 
 const VAZIO: Dados = {
-  diaristas: [], lojas: [], pedidos: [], lancamentos: [], setoresExtras: [],
+  diaristas: [], lojas: [], pedidos: [], lancamentos: [], setoresExtras: [], setoresPedidosExtras: [],
   tarifasRedes: [], tarifasSetores: [], jornadas: {},
 };
 

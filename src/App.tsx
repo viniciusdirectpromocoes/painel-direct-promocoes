@@ -251,7 +251,7 @@ function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
         {pagina === "diaristas" && <Diaristas dados={dados} setDados={setDados} notificar={notificar} />}
         {pagina === "lojas" && <Lojas dados={dados} setDados={setDados} notificar={notificar} />}
         {pagina === "pedidos" && <Pedidos dados={dados} setDados={setDados} notificar={notificar} />}
-        {pagina === "operacao" && <Operacao dados={dados} setDados={setDados} notificar={notificar} />}
+        {pagina === "operacao" && <Operacao dados={dados} />}
         {pagina === "financeiro" && <Financeiro dados={dados} setDados={setDados} notificar={notificar} />}
       </main>
 

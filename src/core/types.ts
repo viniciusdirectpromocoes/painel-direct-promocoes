@@ -96,6 +96,7 @@ export type Dados = {
   pedidos: Pedido[];
   lancamentos: Lancamento[];
   setoresExtras: string[]; // setores cadastrados pelo usuário, além dos padrões
+  setoresPedidosExtras: string[];
   tarifasRedes: TarifaRede[];
   tarifasSetores: TarifaSetor[];
   jornadas: Record<string, Jornada>;

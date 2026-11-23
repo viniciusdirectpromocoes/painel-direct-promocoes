@@ -552,29 +552,71 @@ main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .pedido-form-horario { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .pedido-form .campo select, .pedido-form .campo input { min-width: 0; min-height: 40px; padding: 8px 10px; }
 .jornada-nota { font-size: 12px; }
-.pedido-aplicar { justify-self: start; }
+.pedido-novo-setor { justify-self: start; }
+.pedido-setor-extra {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
 .pedido-referencia { padding: 8px 10px; border-radius: 8px; background: var(--panel-2); font-size: 13px; }
-.operacao-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; }
-.operacao-linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 10px;
+.operacao-grade { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; gap: 16px; }
+.operacao-grade > .painel { min-width: 0; }
+.operacao-total, .operacao-linha {
+  display: grid;
+  gap: 8px;
   padding: 10px;
   border-radius: 10px;
   background: var(--panel-2);
-  transition: background-color 160ms ease;
 }
-.operacao-linha:hover { background: var(--hover-soft); }
-.operacao-linha > strong { flex-basis: 100%; font-size: 14px; }
+.operacao-total { border: 1px solid var(--linha); padding: 12px; }
+.operacao-total p { margin: 4px 0 0; font-size: 12px; }
+.operacao-redes { gap: 8px; }
+.operacao-linha > strong { font-size: 14px; }
+.operacao-valores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 96px), 1fr));
+  gap: 6px;
+  margin: 0;
+}
 .operacao-valor {
-  padding: 3px 7px;
-  border-radius: 6px;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 8px;
   color: #fff;
   font-size: 12px;
 }
-.operacao-valor.entrada { background: #087848; }
-.operacao-valor.saida { background: #0154d8; }
+.operacao-valor dt { font-size: 11px; }
+.operacao-valor dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; }
+.operacao-valor.receber { background: #a8430c; }
+.operacao-valor.repasse { background: #b91c1c; }
+.operacao-valor.lucro { background: #087848; }
+.operacao-valor.margem { background: #facc15; color: #352a09; }
+.operacao-setores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.operacao-setor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--linha);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+.operacao-setor strong { min-width: 0; font-size: 12px; overflow-wrap: anywhere; }
+.operacao-setor .operacao-valor { flex: none; padding: 4px 6px; white-space: nowrap; font-weight: 800; }
 .pedido-botoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .pedido-linha { align-items: flex-start; gap: 8px 16px; }
 .pedido-linha .pedido-botoes { column-gap: 14px; }

@@ -12,8 +12,17 @@ export const SETORES_PEDIDO = SETORES
   .map((setor) => chaveSetor(setor) === "flv" ? "Hortifruti (FLV)" : setor)
   .sort((a, b) => a.localeCompare(b, "pt-BR"));
 
-export function setorPadraoDoPedido(setor: string) {
-  return SETORES_PEDIDO.find((opcao) => chaveSetor(opcao) === chaveSetor(setor)) ?? "";
+export function setoresDoPedido(extras: string[]) {
+  const setores = new Map(SETORES_PEDIDO.map((setor) => [chaveSetor(setor), setor]));
+  for (const setor of extras) {
+    const chave = chaveSetor(setor);
+    if (chave && !setores.has(chave)) setores.set(chave, setor);
+  }
+  return [...setores.values()].sort((a, b) => a.localeCompare(b, "pt-BR"));
+}
+
+export function setorPadraoDoPedido(setor: string, opcoes = SETORES_PEDIDO) {
+  return opcoes.find((opcao) => chaveSetor(opcao) === chaveSetor(setor)) ?? "";
 }
 
 export function tarifaDaOperacao(dados: Dados, rede: string, setor: string) {
