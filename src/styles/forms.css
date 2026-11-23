@@ -284,6 +284,77 @@
 @media (pointer: coarse) {
   .atalho-whatsapp { width: 44px; height: 44px; }
 }
+@media (max-width: 760px) {
+  .tabela-diaristas-wrap { overflow: visible; }
+  .tabela-diaristas, .tabela-diaristas tbody { display: block; min-width: 0; }
+  .tabela-diaristas thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .tabela-diaristas tbody { display: grid; gap: 8px; }
+  .tabela-diaristas tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-areas:
+      "nome status"
+      "cpf telefone"
+      "bairro whatsapp"
+      "turnos locomocao"
+      "acoes acoes";
+    align-items: center;
+    gap: 5px 10px;
+    padding: 9px 10px 6px;
+    border: 1px solid var(--linha);
+    border-radius: 12px;
+  }
+  .tabela-diaristas td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .tabela-diaristas td[data-rotulo]::before {
+    content: attr(data-rotulo);
+    display: block;
+    margin-bottom: 1px;
+    color: var(--muted);
+    font-size: 10px;
+  }
+  .tabela-diaristas .diarista-cel-nome { grid-area: nome; font-size: 13px; }
+  .diarista-cel-cpf { grid-area: cpf; }
+  .diarista-cel-telefone { grid-area: telefone; align-self: start; }
+  .diarista-cel-status { grid-area: status; justify-self: end; }
+  .diarista-cel-whatsapp { grid-area: whatsapp; justify-self: end; }
+  .diarista-cel-bairro { grid-area: bairro; }
+  .diarista-cel-turnos { grid-area: turnos; align-self: start; }
+  .diarista-cel-locomocao { grid-area: locomocao; align-self: start; }
+  .tabela-diaristas td.diaristas-col-acoes {
+    grid-area: acoes;
+    width: auto;
+    padding: 2px 0 0;
+    border-top: 1px solid var(--linha);
+  }
+  .diaristas-acoes { gap: 0 12px; }
+  .diaristas-acoes .link, .diarista-copiar { min-height: 32px; font-size: 11px; }
+  .diarista-cpf { display: flex; align-items: center; flex-wrap: wrap; gap: 0 6px; }
+  .diarista-cpf > span { white-space: nowrap; }
+  .diarista-copiar {
+    flex-shrink: 0;
+    padding-inline: 5px;
+    border-radius: 6px;
+    background: var(--panel-2);
+  }
+  .tabela-diaristas .atalho-whatsapp { width: 34px; height: 34px; }
+  .tabela-diaristas .atalho-whatsapp svg { width: 16px; height: 16px; }
+}
 .nowrap { white-space: nowrap; }
 .selo-pequeno { font-size: 11px; padding: 3px 8px; }
 

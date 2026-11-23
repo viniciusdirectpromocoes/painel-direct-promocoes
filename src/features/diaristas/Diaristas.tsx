@@ -264,9 +264,9 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
           <p className="vazio">Nada encontrado para "{busca}".</p>
         ) : (
           <div className="tabela-wrap tabela-diaristas-wrap" role="region" aria-label="Lista de diaristas" tabIndex={0}>
-            <table className="tabela tabela-diaristas">
-              <thead>
-                <tr>
+            <table className="tabela tabela-diaristas" role="table">
+              <thead role="rowgroup">
+                <tr role="row">
                   <th scope="col">Nome</th>
                   <th scope="col">CPF</th>
                   <th scope="col">Telefone</th>
@@ -278,7 +278,7 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                   <th scope="col" className="diaristas-col-acoes">Ações</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody role="rowgroup">
                 {lista.map((d) => {
                   const status = statusDiarista(d);
                   const cor = status === "Disponível" ? "lime" : status === "Bloqueada" ? "vermelho" : "pink";
@@ -287,11 +287,11 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                     : null;
                   const mensagem = "Olá, sou supervisor da Direct Promoções e estou entrando em contato com você para salvar o meu contato e receber as oportunidades de diárias que acontecem conosco";
                   return (
-                    <tr key={d.id}>
-                      <td>
+                    <tr key={d.id} role="row">
+                      <td role="cell" className="diarista-cel-nome">
                         <strong>{d.nome}</strong>
                       </td>
-                      <td className="nowrap">
+                      <td role="cell" className="nowrap diarista-cel-cpf" data-rotulo="CPF">
                         <div className="diarista-cpf">
                           <span>{d.cpf || "—"}</span>
                           {d.cpf?.trim() && (
@@ -305,9 +305,9 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                           )}
                         </div>
                       </td>
-                      <td className="nowrap">{whatsapp ? formataTelefone(d.telefone) : d.telefone || "—"}</td>
-                      <td className="nowrap"><span className={`selo ${cor} selo-pequeno`}>{status}</span></td>
-                      <td>
+                      <td role="cell" className="nowrap diarista-cel-telefone" data-rotulo="Telefone">{whatsapp ? formataTelefone(d.telefone) : d.telefone || "—"}</td>
+                      <td role="cell" className="nowrap diarista-cel-status"><span className={`selo ${cor} selo-pequeno`}>{status}</span></td>
+                      <td role="cell" className="diarista-cel-whatsapp">
                         {whatsapp ? (
                           <div className="atalhos-whatsapp">
                             <a className="atalho-whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer" title="Abrir conversa sem mensagem" aria-label={`Abrir conversa com ${d.nome} no WhatsApp`}>
@@ -324,10 +324,10 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                           </div>
                         ) : "—"}
                       </td>
-                      <td>{d.bairro || "—"}</td>
-                      <td>{resumoDisponibilidade(d)}</td>
-                      <td>{resumoLocomocao(d)}</td>
-                      <td className="diaristas-col-acoes">
+                      <td role="cell" className="diarista-cel-bairro" data-rotulo="Bairro">{d.bairro || "—"}</td>
+                      <td role="cell" className="diarista-cel-turnos" data-rotulo="Turnos">{resumoDisponibilidade(d)}</td>
+                      <td role="cell" className="diarista-cel-locomocao" data-rotulo="Locomoção">{resumoLocomocao(d)}</td>
+                      <td role="cell" className="diaristas-col-acoes">
                         <div className="diaristas-acoes">
                           <button type="button" className="link" onClick={() => editar(d)}>
                             Editar
