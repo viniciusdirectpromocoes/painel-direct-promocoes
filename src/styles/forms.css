@@ -392,6 +392,9 @@ main .kpis.painel-resumo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .painel-kpi-detalhe { color: #fff; font-size: 12px; line-height: 1.35; }
 main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .painel-secoes .linha > :last-child { flex-shrink: 0; }
+.pedido-form { display: grid; gap: 14px; }
+.pedido-form .campo { min-width: 0; }
+.pedido-botoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 @media (max-width: 960px) {
   main .kpis.painel-resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   main .painel-secoes { grid-template-columns: minmax(0, 1fr); }
@@ -556,7 +559,7 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
 
   aside.side .nav {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
     width: 100%;
   }

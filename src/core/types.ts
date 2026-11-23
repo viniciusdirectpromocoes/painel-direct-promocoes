@@ -35,6 +35,14 @@ export type Loja = {
   criadoEm: string;
 };
 
+export type Pedido = {
+  id: string;
+  lojaId: string;
+  setor: string;
+  inicio: string;
+  fim: string;
+};
+
 /**
  * Diárias: o que a diarista trabalhou e o quanto deve receber.
  * Recebimento: o que a empresa (rede) mandou para a Direct.
@@ -71,10 +79,11 @@ export type Lancamento = {
 export type Dados = {
   diaristas: Diarista[];
   lojas: Loja[];
+  pedidos: Pedido[];
   lancamentos: Lancamento[];
   setoresExtras: string[]; // setores cadastrados pelo usuário, além dos padrões
 };
 
-export type Pagina = "painel" | "diaristas" | "lojas" | "financeiro";
+export type Pagina = "painel" | "diaristas" | "lojas" | "pedidos" | "financeiro";
 
 export type SetDados = Dispatch<SetStateAction<Dados>>;

@@ -1,7 +1,8 @@
 import type { Dados, Pagina } from "../../core/types";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
 import { dataCurta, moeda } from "../../core/format";
-import { disponivel, pendenteDaDiaria } from "../../core/regras";
+import { disponivel, pendenteDaDiaria, quantidadeDiarias } from "../../core/regras";
+import { VALOR_DIARIA } from "../../core/constants";
 
 type Props = { dados: Dados; irPara: (p: Pagina) => void };
 
@@ -16,11 +17,11 @@ export function Painel({ dados, irPara }: Props) {
   const nomes = new Map(dados.diaristas.map((d) => [d.id, d.nome]));
   const porPessoa = new Map<string, { nome: string; valor: number; registros: number }>();
   let pagamentosPendentes = 0;
-  let diasTrabalhados = 0;
+  let totalDiariasAPagar = 0;
 
   for (const diaria of dados.lancamentos) {
     if (diaria.categoria !== "Diárias") continue;
-    diasTrabalhados += diaria.diasTrabalhados?.length ?? 0;
+    totalDiariasAPagar += diaria.valor;
     const restante = pendenteDaDiaria(diaria);
     if (restante === 0) continue;
     pagamentosPendentes += restante;
@@ -37,6 +38,7 @@ export function Painel({ dados, irPara }: Props) {
   }
   const pendencias = [...porPessoa.entries()].sort((a, b) => b[1].valor - a[1].valor);
   const formatarQuantidade = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 }).format;
+  const formatarDiarias = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format;
 
   // Lançamentos novos entram no começo da lista (ver upsert em core/store.ts).
   const recentes = dados.lancamentos.slice(0, 5);
@@ -46,7 +48,7 @@ export function Painel({ dados, irPara }: Props) {
     { rotulo: "Saída", valor: saidas, formatar: moeda, cor: "red", detalhe: "Pagamentos e adiantamentos" },
     { rotulo: "Pagamentos pendentes", valor: pagamentosPendentes, formatar: moeda, cor: "orange", detalhe: "Valor de diárias a pagar" },
     { rotulo: "Saldo de caixa", valor: entradas - saidas, formatar: moeda, cor: "blue", detalhe: "Entradas menos saídas" },
-    { rotulo: "Diárias trabalhadas", valor: diasTrabalhados, formatar: formatarQuantidade, cor: "pink", detalhe: "Dias trabalhados registrados" },
+    { rotulo: "Áreas atendidas", valor: quantidadeDiarias(totalDiariasAPagar), formatar: formatarDiarias, cor: "pink", detalhe: `Diárias registradas a ${moeda(VALOR_DIARIA)} cada` },
     { rotulo: "Diaristas disponíveis", valor: disponiveis, formatar: formatarQuantidade, cor: "cyan", detalhe: `De ${formatarQuantidade(dados.diaristas.length)} cadastrados` },
   ] as const;
 
