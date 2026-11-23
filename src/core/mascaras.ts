@@ -29,9 +29,15 @@ export function formataCep(valor: string) {
   return d.length > 5 ? `${d.slice(0, 5)}-${d.slice(5)}` : d;
 }
 
+/** Remove o código do país apenas de números completos em formato internacional. */
+export function telefoneNacional(valor: string) {
+  const d = digitos(valor);
+  return d.startsWith("55") && (d.length === 12 || d.length === 13) ? d.slice(2) : d;
+}
+
 /** Máscara: (85) 90000-0000 */
 export function formataTelefone(valor: string) {
-  const d = digitos(valor).slice(0, 11);
+  const d = telefoneNacional(valor).slice(0, 11);
   if (d.length === 0) return "";
   if (d.length <= 2) return `(${d}`;
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
@@ -40,7 +46,7 @@ export function formataTelefone(valor: string) {
 }
 
 export function telefoneValido(valor: string) {
-  const n = digitos(valor).length;
+  const n = telefoneNacional(valor).length;
   return n === 10 || n === 11;
 }
 

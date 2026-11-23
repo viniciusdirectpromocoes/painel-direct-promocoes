@@ -3,7 +3,7 @@ import type { Dados, Diarista, Regiao, SetDados, Turno } from "../../core/types"
 import { upsert } from "../../core/store";
 import { uid } from "../../core/format";
 import { CIDADE_PADRAO, SETORES, TRANSPORTES, TURNOS, UF_PADRAO, UFS } from "../../core/constants";
-import { cepValido, cpfValido, formataCep, formataCpf, formataTelefone, telefoneValido } from "../../core/mascaras";
+import { cepValido, cpfValido, formataCep, formataCpf, formataTelefone, telefoneNacional, telefoneValido } from "../../core/mascaras";
 import { buscarCep } from "../../core/cep";
 import { disponivel, resumoDisponibilidade, resumoLocomocao, statusDiarista } from "../../core/regras";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
@@ -68,11 +68,12 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
 
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
+    const buscaTelefone = /^[\d()+\s-]+$/.test(termo) ? telefoneNacional(termo) : "";
     return dados.diaristas
       .filter((d) =>
-        `${d.nome} ${d.cpf} ${d.telefone} ${d.bairro} ${d.cidade} ${d.setores.join(" ")} ${d.transportes.join(" ")}`
+        `${d.nome} ${d.cpf} ${d.telefone} ${formataTelefone(d.telefone)} ${d.bairro} ${d.cidade} ${d.setores.join(" ")} ${d.transportes.join(" ")}`
           .toLowerCase()
-          .includes(termo),
+          .includes(termo) || (buscaTelefone !== "" && telefoneNacional(d.telefone).includes(buscaTelefone)),
       )
       .sort((a, b) => a.nome.localeCompare(b.nome));
   }, [dados.diaristas, busca]);
@@ -188,7 +189,11 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
     const { id: _id, criadoEm: _criado, ...resto } = d;
     void _id;
     void _criado;
-    setForm({ ...resto, turnos: resto.turnos ?? [] });
+    setForm({
+      ...resto,
+      telefone: telefoneValido(resto.telefone) ? formataTelefone(resto.telefone) : resto.telefone,
+      turnos: resto.turnos ?? [],
+    });
     setFormAberto(true);
   }
 
@@ -256,6 +261,8 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                   <th scope="col">Nome</th>
                   <th scope="col">CPF</th>
                   <th scope="col">Telefone</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">WhatsApp</th>
                   <th scope="col">Bairro</th>
                   <th scope="col">Disponibilidade</th>
                   <th scope="col">Locomoção</th>
@@ -268,15 +275,35 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                 {lista.map((d) => {
                   const status = statusDiarista(d);
                   const cor = status === "Disponível" ? "lime" : status === "Bloqueada" ? "vermelho" : "pink";
+                  const whatsapp = telefoneValido(d.telefone)
+                    ? `https://web.whatsapp.com/send?phone=55${telefoneNacional(d.telefone)}`
+                    : null;
+                  const mensagem = "Olá, sou supervisor da Direct Promoções e estou entrando em contato com você para salvar o meu contato e receber as oportunidades de diárias que acontecem conosco";
                   return (
                     <tr key={d.id}>
                       <td>
                         <strong>{d.nome}</strong>
-                        <br />
-                        <span className={`selo ${cor} selo-pequeno`}>{status}</span>
                       </td>
                       <td className="nowrap">{d.cpf}</td>
-                      <td className="nowrap">{d.telefone}</td>
+                      <td className="nowrap">{whatsapp ? formataTelefone(d.telefone) : d.telefone || "—"}</td>
+                      <td className="nowrap"><span className={`selo ${cor} selo-pequeno`}>{status}</span></td>
+                      <td>
+                        {whatsapp ? (
+                          <div className="atalhos-whatsapp">
+                            <a className="atalho-whatsapp" href={whatsapp} target="_blank" rel="noopener noreferrer" title="Abrir conversa sem mensagem" aria-label={`Abrir conversa com ${d.nome} no WhatsApp`}>
+                              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 11.5a8 8 0 0 1-8 8 8 8 0 0 1-3.6-.9L4 20l1.4-4.4A8 8 0 1 1 20 11.5Z" />
+                                <path d="M9 11.5h6" />
+                              </svg>
+                            </a>
+                            <a className="atalho-whatsapp atalho-whatsapp-mensagem" href={`${whatsapp}&text=${encodeURIComponent(mensagem)}`} target="_blank" rel="noopener noreferrer" title="Abrir conversa com mensagem pronta" aria-label={`Abrir mensagem pronta para ${d.nome} no WhatsApp`}>
+                              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="m21 3-7 18-3.5-7.5L3 10l18-7ZM21 3 10.5 13.5" />
+                              </svg>
+                            </a>
+                          </div>
+                        ) : "—"}
+                      </td>
                       <td>{d.bairro || "—"}</td>
                       <td>{resumoDisponibilidade(d)}</td>
                       <td>{resumoLocomocao(d)}</td>

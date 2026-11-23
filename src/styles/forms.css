@@ -215,6 +215,24 @@
 
 /* Tabela de diaristas */
 .tabela-diaristas td { font-size: 14px; }
+.atalhos-whatsapp { display: flex; gap: 6px; }
+.atalho-whatsapp {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  color: #fff;
+  background: #087848;
+  transition: filter 160ms ease;
+}
+.atalho-whatsapp-mensagem { background: #0154d8; }
+.atalho-whatsapp svg { width: 18px; height: 18px; }
+.atalho-whatsapp:hover { filter: brightness(1.13); }
+.atalho-whatsapp:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (pointer: coarse) {
+  .atalho-whatsapp { width: 44px; height: 44px; }
+}
 .nowrap { white-space: nowrap; }
 .selo-pequeno { font-size: 11px; padding: 3px 8px; }
 
