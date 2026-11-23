@@ -3,7 +3,7 @@ import type { Dados, CategoriaLancamento, Lancamento, SetDados, TipoAdiantamento
 import { upsert } from "../../core/store";
 import { dataCurta, hoje, lerValor, moeda, uid } from "../../core/format";
 import { FORMA_PAGAMENTO, SETORES, VALOR_DIARIA } from "../../core/constants";
-import { textoDiarias, quantidadeDiarias } from "../../core/regras";
+import { textoDiarias, quantidadeDiarias, pendenteDaDiaria } from "../../core/regras";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
 import "../../styles/forms.css";
 
@@ -55,9 +55,6 @@ const dataSemAno = (iso: string) => {
 
 /** Arredonda para centavos, evitando erros de ponto flutuante. */
 const centavos = (n: number) => Math.round(n * 100) / 100;
-
-/** Quanto ainda falta pagar de uma diária. */
-const pendenteDaDiaria = (l: Lancamento) => centavos(Math.max(0, l.valor - (l.pagoValor ?? 0)));
 
 /** Quanto uma diarista tem pendente, somando todas as suas diárias. */
 function pendenteDaDiarista(lancamentos: Lancamento[], diaristaId: string) {

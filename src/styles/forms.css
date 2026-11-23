@@ -387,6 +387,15 @@ article.kpi .kpi-rotulo,
 article.kpi .kpi-valor,
 article.kpi .kpi-lista { color: #fff; }
 article.kpi .kpi-rotulo { opacity: 0.9; }
+main .kpis.painel-resumo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.painel-resumo .kpi-valor { overflow-wrap: anywhere; }
+.painel-kpi-detalhe { color: #fff; font-size: 12px; line-height: 1.35; }
+main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.painel-secoes .linha > :last-child { flex-shrink: 0; }
+@media (max-width: 960px) {
+  main .kpis.painel-resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  main .painel-secoes { grid-template-columns: minmax(0, 1fr); }
+}
 article.kpi:hover {
   transform: translateY(-4px);
   box-shadow: 0 22px 36px -10px var(--acc);

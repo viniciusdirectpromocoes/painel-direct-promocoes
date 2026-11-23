@@ -1,4 +1,4 @@
-import type { Diarista } from "./types";
+import type { Diarista, Lancamento } from "./types";
 import { TURNOS, VALOR_DIARIA } from "./constants";
 
 export type StatusDiarista = "Disponível" | "Trabalhando" | "Bloqueada";
@@ -10,6 +10,11 @@ export function statusDiarista(d: Diarista): StatusDiarista {
 }
 
 export const disponivel = (d: Diarista) => statusDiarista(d) === "Disponível";
+
+/** Valor da diária que falta pagar, descontando os pagamentos já alocados. */
+export function pendenteDaDiaria(diaria: Lancamento) {
+  return Math.round(Math.max(0, diaria.valor - (diaria.pagoValor ?? 0)) * 100) / 100;
+}
 
 /** Turnos em que a diarista pode trabalhar, ex.: "Manhã, Noite". */
 export function resumoDisponibilidade(d: Diarista): string {
