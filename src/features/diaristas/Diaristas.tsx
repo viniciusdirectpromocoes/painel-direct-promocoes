@@ -254,7 +254,7 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
         ) : lista.length === 0 ? (
           <p className="vazio">Nada encontrado para "{busca}".</p>
         ) : (
-          <div className="tabela-wrap">
+          <div className="tabela-wrap tabela-diaristas-wrap" role="region" aria-label="Lista de diaristas" tabIndex={0}>
             <table className="tabela tabela-diaristas">
               <thead>
                 <tr>
@@ -266,9 +266,7 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                   <th scope="col">Bairro</th>
                   <th scope="col">Disponibilidade</th>
                   <th scope="col">Locomoção</th>
-                  <th scope="col">
-                    <span className="sr-only">Ações</span>
-                  </th>
+                  <th scope="col" className="diaristas-col-acoes">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -307,16 +305,18 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                       <td>{d.bairro || "—"}</td>
                       <td>{resumoDisponibilidade(d)}</td>
                       <td>{resumoLocomocao(d)}</td>
-                      <td className="tabela-acoes">
-                        <button type="button" className="link" onClick={() => editar(d)}>
-                          Editar
-                        </button>
-                        <button type="button" className="link" onClick={() => alternarBloqueio(d)}>
-                          {d.bloqueada ? "Desbloquear" : "Bloquear"}
-                        </button>
-                        <button type="button" className="link perigo" onClick={() => excluir(d)}>
-                          Excluir
-                        </button>
+                      <td className="diaristas-col-acoes">
+                        <div className="diaristas-acoes">
+                          <button type="button" className="link" onClick={() => editar(d)}>
+                            Editar
+                          </button>
+                          <button type="button" className="link" onClick={() => alternarBloqueio(d)}>
+                            {d.bloqueada ? "Desbloquear" : "Bloquear"}
+                          </button>
+                          <button type="button" className="link perigo" onClick={() => excluir(d)}>
+                            Excluir
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

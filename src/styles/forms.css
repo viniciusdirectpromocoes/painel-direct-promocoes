@@ -214,7 +214,24 @@
 .botao.mini { padding: 8px 12px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
 
 /* Tabela de diaristas */
+.tabela-diaristas-wrap {
+  max-width: 100%;
+  scrollbar-width: thin;
+}
+.tabela-diaristas-wrap:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.tabela-diaristas { min-width: 820px; }
 .tabela-diaristas td { font-size: 14px; }
+.tabela-diaristas .diaristas-col-acoes { width: 16%; padding-right: 14px; }
+.diaristas-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 9px;
+}
+.diaristas-acoes .link { white-space: nowrap; }
 .atalhos-whatsapp { display: flex; gap: 6px; }
 .atalho-whatsapp {
   display: inline-grid;
