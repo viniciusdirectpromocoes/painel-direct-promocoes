@@ -41,6 +41,10 @@ export type Pedido = {
   setor: string;
   inicio: string;
   fim: string;
+  datas?: string[];
+  horaInicio?: string;
+  horaFim?: string;
+  diaristaId?: string;
 };
 
 /**

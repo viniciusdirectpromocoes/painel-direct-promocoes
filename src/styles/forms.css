@@ -542,6 +542,47 @@ main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .pedido-form { display: grid; gap: 14px; }
 .pedido-form .campo { min-width: 0; }
 .pedido-botoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.pedido-linha { align-items: flex-start; gap: 8px 16px; }
+.pedido-linha .pedido-botoes { column-gap: 14px; }
+.calendario-pedido {
+  min-width: 0;
+  width: min(100%, 430px);
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--linha);
+  border-radius: 12px;
+}
+.calendario-pedido legend { padding: 0 5px; font-weight: 700; }
+.calendario-mes { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.calendario-mes strong { text-align: center; }
+.calendario-dias {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 8px;
+  text-align: center;
+}
+.calendario-semana { align-self: center; font-size: 11px; color: var(--muted); }
+.calendario-pedido button {
+  min-width: 0;
+  min-height: 34px;
+  padding: 2px;
+  border: 1px solid var(--linha);
+  border-radius: 7px;
+  background: var(--panel-2);
+  color: var(--ink);
+  cursor: pointer;
+}
+.calendario-mes button { min-width: 34px; font-size: 20px; }
+.calendario-pedido button[aria-current="date"] { border-color: currentColor; font-weight: 700; }
+.calendario-pedido button[aria-pressed="true"] { background: #0154d8; color: #fff; }
+.calendario-total { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; }
+@media (max-width: 760px) {
+  .pedido-linha { flex-wrap: wrap; }
+  .pedido-linha .linha-texto { flex-basis: 100%; }
+  .pedido-linha .pedido-botoes { justify-content: flex-start; }
+  .calendario-pedido { padding: 8px; }
+}
 @media (max-width: 960px) {
   main .kpis.painel-resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   main .painel-secoes { grid-template-columns: minmax(0, 1fr); }
