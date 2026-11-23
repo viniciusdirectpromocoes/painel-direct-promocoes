@@ -48,7 +48,7 @@ export function Painel({ dados, irPara }: Props) {
     { rotulo: "Saída", valor: saidas, formatar: moeda, cor: "red", detalhe: "Pagamentos e adiantamentos" },
     { rotulo: "Pagamentos pendentes", valor: pagamentosPendentes, formatar: moeda, cor: "orange", detalhe: "Valor de diárias a pagar" },
     { rotulo: "Saldo de caixa", valor: entradas - saidas, formatar: moeda, cor: "blue", detalhe: "Entradas menos saídas" },
-    { rotulo: "Áreas atendidas", valor: quantidadeDiarias(totalDiariasAPagar), formatar: formatarDiarias, cor: "pink", detalhe: `Diárias registradas a ${moeda(VALOR_DIARIA)} cada` },
+    { rotulo: "Diárias atendidas", valor: quantidadeDiarias(totalDiariasAPagar), formatar: formatarDiarias, cor: "pink", detalhe: `Diárias registradas a ${moeda(VALOR_DIARIA)} cada` },
     { rotulo: "Diaristas disponíveis", valor: disponiveis, formatar: formatarQuantidade, cor: "cyan", detalhe: `De ${formatarQuantidade(dados.diaristas.length)} cadastrados` },
   ] as const;
 
