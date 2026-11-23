@@ -2,21 +2,22 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { copiarTexto } from "../../core/clipboard";
 import { CamposJornada } from "../../components/CamposJornada";
 import { dataCurta, moeda, uid } from "../../core/format";
-import { chaveOperacao, erroDaJornada, jornadaVazia, setoresDaOperacao, tarifaDaOperacao } from "../../core/operacao";
+import { calcularHoraFim, chaveOperacao, SETORES_PEDIDO, setorPadraoDoPedido, tarifaDaOperacao } from "../../core/operacao";
 import { upsert } from "../../core/store";
-import type { Dados, Jornada, Loja, Pedido, SetDados } from "../../core/types";
+import type { Dados, Loja, Pedido, SetDados } from "../../core/types";
 import { CalendarioPedido } from "./CalendarioPedido";
 
 type Props = { dados: Dados; setDados: SetDados; notificar: (texto: string) => void };
-type Form = Jornada & {
+type Form = {
   id?: string;
   lojaId: string;
   setor: string;
   datas: string[];
+  horaInicio: string;
   diaristaId: string;
 };
 
-const vazio: Form = { ...jornadaVazia, lojaId: "", setor: "", datas: [], diaristaId: "" };
+const vazio: Form = { lojaId: "", setor: "", datas: [], horaInicio: "", diaristaId: "" };
 
 function datasDoPedido(pedido: Pedido): string[] {
   if (pedido.datas) return pedido.datas;
@@ -42,21 +43,14 @@ function horarioPedido(pedido: Pedido) {
 export function Pedidos({ dados, setDados, notificar }: Props) {
   const [form, setForm] = useState<Form | null>(null);
   const [erro, setErro] = useState("");
-  const [buscaLoja, setBuscaLoja] = useState("");
-  const [buscaSetor, setBuscaSetor] = useState("");
   const tituloForm = useRef<HTMLHeadingElement>(null);
   const tituloFormId = form ? form.id ?? "novo" : null;
-  const setores = setoresDaOperacao(dados, form?.setor);
   const lojas = [...dados.lojas].sort((a, b) => a.rede.localeCompare(b.rede) || a.nome.localeCompare(b.nome));
   const diaristas = [...dados.diaristas].sort((a, b) => a.nome.localeCompare(b.nome));
   const lojasPorId = new Map(lojas.map((loja) => [loja.id, loja]));
   const diaristasPorId = new Map(diaristas.map((diarista) => [diarista.id, diarista]));
   const gruposLojas = new Map<string, Loja[]>();
-  const termoLoja = chaveOperacao(buscaLoja);
-  const termoSetor = chaveOperacao(buscaSetor);
-  const lojasVisiveis = lojas.filter((loja) => loja.id === form?.lojaId || chaveOperacao(`${loja.rede} ${loja.nome} ${loja.endereco}`).includes(termoLoja));
-  const setoresVisiveis = setores.filter((setor) => setor === form?.setor || chaveOperacao(setor).includes(termoSetor));
-  for (const loja of lojasVisiveis) {
+  for (const loja of lojas) {
     const grupo = gruposLojas.get(loja.rede) ?? [];
     grupo.push(loja);
     gruposLojas.set(loja.rede, grupo);
@@ -71,8 +65,6 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
 
   function abrirCadastro() {
     setErro("");
-    setBuscaLoja("");
-    setBuscaSetor("");
     setForm(vazio);
   }
 
@@ -83,17 +75,12 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
 
   function editar(pedido: Pedido) {
     setErro("");
-    setBuscaLoja("");
-    setBuscaSetor("");
     setForm({
       id: pedido.id,
       lojaId: pedido.lojaId,
-      setor: pedido.setor.trim(),
+      setor: setorPadraoDoPedido(pedido.setor),
       datas: datasDoPedido(pedido),
       horaInicio: pedido.horaInicio ?? "",
-      horaFim: pedido.horaFim ?? "",
-      intervaloInicio: pedido.intervaloInicio ?? "",
-      intervaloFim: pedido.intervaloFim ?? "",
       diaristaId: pedido.diaristaId ?? "",
     });
   }
@@ -109,9 +96,9 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       setErro("Selecione um setor.");
       return;
     }
-    const erroHorario = erroDaJornada(form);
-    if (erroHorario) {
-      setErro(erroHorario);
+    const horaFim = calcularHoraFim(form.horaInicio);
+    if (!horaFim) {
+      setErro("Informe o horário de início.");
       return;
     }
     if (!form.datas.length) {
@@ -119,6 +106,7 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       return;
     }
     const pedido: Pedido = {
+      ...dados.pedidos.find((item) => item.id === form.id),
       id: form.id ?? uid(),
       lojaId: form.lojaId,
       setor: form.setor,
@@ -126,9 +114,7 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       inicio: form.datas[0],
       fim: form.datas[form.datas.length - 1],
       horaInicio: form.horaInicio,
-      horaFim: form.horaFim,
-      intervaloInicio: form.intervaloInicio || undefined,
-      intervaloFim: form.intervaloFim || undefined,
+      horaFim,
       diaristaId: diaristasPorId.has(form.diaristaId) ? form.diaristaId : undefined,
     };
     setDados((atual) => ({ ...atual, pedidos: upsert(atual.pedidos, pedido) }));
@@ -143,9 +129,8 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
     const texto = [
       loja ? `Loja: ${loja.rede} · ${loja.nome}` : "Loja não cadastrada",
       loja?.endereco && `Endereço: ${loja.endereco}`,
-      `Setor: ${pedido.setor}`,
+      `Setor: ${setorPadraoDoPedido(pedido.setor) || pedido.setor}`,
       `Horário: ${horarioPedido(pedido)}`,
-      pedido.intervaloInicio && pedido.intervaloFim && `Intervalo: ${pedido.intervaloInicio} às ${pedido.intervaloFim}`,
       `Datas: ${datas.map(dataCurta).join(", ")}`,
       rotuloDiarias(datas.length),
       diarista ? `Diarista: ${diarista.nome}` : "Diarista a definir",
@@ -184,9 +169,8 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
             <div className="pedido-form-grade">
               <CalendarioPedido key={tituloFormId} datas={form.datas} onChange={(datas) => atualizar("datas", datas)} />
               <div className="pedido-form-campos">
-                <input className="busca pedido-busca" type="search" aria-label="Buscar na lista de lojas" placeholder="Buscar loja ou rede" value={buscaLoja} onChange={(e) => setBuscaLoja(e.target.value)} />
                 <label className="campo">
-                  <span>Loja · {lojasVisiveis.length} de {lojas.length}</span>
+                  <span>Loja</span>
                   <select value={form.lojaId} onChange={(e) => atualizar("lojaId", e.target.value)} required>
                     <option value="">Selecione uma loja</option>
                     {[...gruposLojas].map(([rede, grupo]) => (
@@ -196,22 +180,19 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
                     ))}
                   </select>
                 </label>
-                <input className="busca pedido-busca" type="search" aria-label="Buscar na lista de setores" placeholder="Buscar setor" value={buscaSetor} onChange={(e) => setBuscaSetor(e.target.value)} />
                 <label className="campo">
-                  <span>Setor · {setoresVisiveis.length} de {setores.length}</span>
+                  <span>Setor</span>
                   <select value={form.setor} onChange={(e) => atualizar("setor", e.target.value)} required>
                     <option value="">Selecione um setor</option>
-                    {setoresVisiveis.map((setor) => <option key={setor}>{setor}</option>)}
+                    {SETORES_PEDIDO.map((setor) => <option key={setor}>{setor}</option>)}
                   </select>
                 </label>
-                {jornadaPadrao && (
-                  <button type="button" className="link pedido-aplicar" onClick={() => {
-                    setErro("");
-                    setForm((atual) => atual && { ...atual, ...jornadaPadrao });
-                  }}>Usar horário padrão da rede</button>
+                {jornadaPadrao?.horaInicio && (
+                  <button type="button" className="link pedido-aplicar" onClick={() => atualizar("horaInicio", jornadaPadrao.horaInicio)}>
+                    Usar horário padrão da rede
+                  </button>
                 )}
-                <CamposJornada jornada={form} atualizar={atualizar} />
-                {form.horaInicio && form.horaFim && form.horaFim < form.horaInicio && <p className="muted">O turno termina no dia seguinte.</p>}
+                <CamposJornada inicio={form.horaInicio} atualizar={(inicio) => atualizar("horaInicio", inicio)} />
                 <label className="campo">
                   <span>Diarista (opcional)</span>
                   <select value={form.diaristaId} onChange={(e) => atualizar("diaristaId", e.target.value)}>
@@ -250,8 +231,7 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
                 <li key={pedido.id} className="linha pedido-linha">
                   <div className="linha-texto">
                     <strong>{loja ? `${loja.rede} · ${loja.nome}` : "Loja não cadastrada"}</strong>
-                    <span className="muted">{pedido.setor} · {horarioPedido(pedido)} · {rotuloDiarias(datas.length)}</span>
-                    {pedido.intervaloInicio && pedido.intervaloFim && <span className="muted">Intervalo {pedido.intervaloInicio}–{pedido.intervaloFim}</span>}
+                    <span className="muted">{setorPadraoDoPedido(pedido.setor) || pedido.setor} · {horarioPedido(pedido)} · {rotuloDiarias(datas.length)}</span>
                     <span className="muted">{datas.map(dataCurta).join(", ")}</span>
                     <span className="muted">{diarista ? diarista.nome : "Diarista a definir"}</span>
                   </div>

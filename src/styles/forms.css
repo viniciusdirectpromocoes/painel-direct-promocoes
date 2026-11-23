@@ -551,7 +551,7 @@ main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .pedido-form-campos { display: grid; gap: 10px; min-width: 0; }
 .pedido-form-horario { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .pedido-form .campo select, .pedido-form .campo input { min-width: 0; min-height: 40px; padding: 8px 10px; }
-.pedido-form .pedido-busca { min-width: 0; padding: 8px 10px; }
+.jornada-nota { font-size: 12px; }
 .pedido-aplicar { justify-self: start; }
 .pedido-referencia { padding: 8px 10px; border-radius: 8px; background: var(--panel-2); font-size: 13px; }
 .operacao-grade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; }

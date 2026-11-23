@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { CamposJornada } from "../../components/CamposJornada";
 import { moeda } from "../../core/format";
-import { chaveOperacao, erroDaJornada, jornadaVazia } from "../../core/operacao";
-import type { Dados, Jornada, SetDados } from "../../core/types";
+import { calcularHoraFim, chaveOperacao } from "../../core/operacao";
+import type { Dados, SetDados } from "../../core/types";
 
 export function Operacao({ dados, setDados, notificar }: {
   dados: Dados;
@@ -10,23 +10,28 @@ export function Operacao({ dados, setDados, notificar }: {
   notificar: (texto: string) => void;
 }) {
   const [rede, setRede] = useState("");
-  const [jornada, setJornada] = useState<Jornada>(jornadaVazia);
+  const [inicio, setInicio] = useState("");
   const [erro, setErro] = useState("");
   const redes = [...new Set([...dados.lojas.map((loja) => loja.rede), ...dados.tarifasRedes.map((tarifa) => tarifa.rede)])]
     .filter(Boolean).sort((a, b) => a.localeCompare(b, "pt-BR"));
 
   function selecionarRede(nome: string) {
     setRede(nome);
-    setJornada(dados.jornadas[chaveOperacao(nome)] ?? jornadaVazia);
+    setInicio(dados.jornadas[chaveOperacao(nome)]?.horaInicio ?? "");
     setErro("");
   }
 
   function salvar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
-    const mensagem = rede ? erroDaJornada(jornada) : "Selecione uma rede.";
+    const horaFim = calcularHoraFim(inicio);
+    const mensagem = !rede ? "Selecione uma rede." : !horaFim ? "Informe o horário de início." : "";
     setErro(mensagem);
     if (mensagem) return;
-    setDados((atual) => ({ ...atual, jornadas: { ...atual.jornadas, [chaveOperacao(rede)]: jornada } }));
+    const chave = chaveOperacao(rede);
+    setDados((atual) => ({
+      ...atual,
+      jornadas: { ...atual.jornadas, [chave]: { ...atual.jornadas[chave], horaInicio: inicio, horaFim } },
+    }));
     notificar("Horário padrão salvo");
   }
 
@@ -52,7 +57,7 @@ export function Operacao({ dados, setDados, notificar }: {
           )}
         </section>
         <section className="painel rise">
-          <h2>Horários e intervalo</h2>
+          <h2>Horário padrão por rede</h2>
           <form className="pedido-form" onSubmit={salvar} noValidate>
             <label className="campo">
               <span>Rede</span>
@@ -61,11 +66,10 @@ export function Operacao({ dados, setDados, notificar }: {
                 {redes.map((nome) => <option key={nome}>{nome}</option>)}
               </select>
             </label>
-            <CamposJornada jornada={jornada} atualizar={(campo, valor) => {
+            <CamposJornada inicio={inicio} atualizar={(valor) => {
               setErro("");
-              setJornada((atual) => ({ ...atual, [campo]: valor }));
+              setInicio(valor);
             }} />
-            <p className="muted">O intervalo é opcional. Você pode aplicar o horário padrão ao criar um pedido.</p>
             {erro && <p className="aviso-texto" role="alert">{erro}</p>}
             <div className="pedido-botoes">
               <button type="submit" className="botao primario">Salvar horário padrão</button>

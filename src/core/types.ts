@@ -52,8 +52,6 @@ export type Pedido = {
 export type Jornada = {
   horaInicio: string;
   horaFim: string;
-  intervaloInicio: string;
-  intervaloFim: string;
 };
 
 export type TarifaRede = { rede: string; recebe: number; paga: number };
