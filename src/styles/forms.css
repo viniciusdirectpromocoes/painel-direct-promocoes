@@ -232,6 +232,14 @@
   gap: 6px 9px;
 }
 .diaristas-acoes .link { white-space: nowrap; }
+.diarista-cpf { display: grid; justify-items: start; }
+.diarista-copiar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.diarista-copiar svg { width: 13px; height: 13px; }
 .atalhos-whatsapp { display: flex; gap: 6px; }
 .atalho-whatsapp {
   display: inline-grid;

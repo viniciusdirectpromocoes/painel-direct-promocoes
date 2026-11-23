@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Dados, Diarista, Regiao, SetDados, Turno } from "../../core/types";
 import { upsert } from "../../core/store";
 import { uid } from "../../core/format";
+import { copiarTexto } from "../../core/clipboard";
 import { CIDADE_PADRAO, SETORES, TRANSPORTES, TURNOS, UF_PADRAO, UFS } from "../../core/constants";
 import { cepValido, cpfValido, formataCep, formataCpf, formataTelefone, telefoneNacional, telefoneValido } from "../../core/mascaras";
 import { buscarCep } from "../../core/cep";
@@ -211,6 +212,14 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
     notificar("Diarista excluída");
   }
 
+  async function copiarIdentificacao(diarista: Diarista) {
+    const partes = diarista.nome.trim().split(/\s+/);
+    const nome = partes.length > 3 ? `${partes[0]} ${partes[partes.length - 1]}` : partes.join(" ");
+    const cpf = diarista.cpf.replace(/\D/g, "").length === 11 ? formataCpf(diarista.cpf) : diarista.cpf.trim();
+    const copiado = await copiarTexto(`${nome}\nCPF: ${cpf}`);
+    notificar(copiado ? "Nome e CPF copiados" : "Não foi possível copiar. Selecione os dados e copie.");
+  }
+
   return (
     <section>
       <header className="cabeca rise">
@@ -282,7 +291,20 @@ export function Diaristas({ dados, setDados, notificar }: Props) {
                       <td>
                         <strong>{d.nome}</strong>
                       </td>
-                      <td className="nowrap">{d.cpf}</td>
+                      <td className="nowrap">
+                        <div className="diarista-cpf">
+                          <span>{d.cpf || "—"}</span>
+                          {d.cpf?.trim() && (
+                            <button type="button" className="link diarista-copiar" onClick={() => void copiarIdentificacao(d)} title="Copiar nome e CPF" aria-label={`Copiar nome e CPF de ${d.nome}`}>
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <rect x="8" y="8" width="12" height="12" rx="2" />
+                                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                              </svg>
+                              Copiar
+                            </button>
+                          )}
+                        </div>
+                      </td>
                       <td className="nowrap">{whatsapp ? formataTelefone(d.telefone) : d.telefone || "—"}</td>
                       <td className="nowrap"><span className={`selo ${cor} selo-pequeno`}>{status}</span></td>
                       <td>

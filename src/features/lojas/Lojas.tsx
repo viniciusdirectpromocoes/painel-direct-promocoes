@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Dados, Loja, SetDados } from "../../core/types";
 import { upsert } from "../../core/store";
 import { uid } from "../../core/format";
+import { copiarTexto } from "../../core/clipboard";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
 import "../../styles/forms.css";
 
@@ -14,24 +15,6 @@ const vazio = (): Form => ({ rede: "", nome: "", endereco: "" });
 /** Mensagem pronta para enviar ao diarista, com rede, loja e endereço. */
 function mensagemDaLoja(l: Loja) {
   return `Olá! Segue o local da diária:\n\nRede: ${l.rede}\nLoja: ${l.nome}\nEndereço: ${l.endereco}`;
-}
-
-async function copiarTexto(texto: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(texto);
-    return true;
-  } catch {
-    // Alternativa para navegadores sem acesso à área de transferência.
-    const area = document.createElement("textarea");
-    area.value = texto;
-    area.style.position = "fixed";
-    area.style.opacity = "0";
-    document.body.appendChild(area);
-    area.select();
-    const ok = document.execCommand("copy");
-    document.body.removeChild(area);
-    return ok;
-  }
 }
 
 function validar(f: Form): string {
