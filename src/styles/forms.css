@@ -541,6 +541,16 @@ main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .painel-secoes .linha > :last-child { flex-shrink: 0; }
 .pedido-form { display: grid; gap: 14px; }
 .pedido-form .campo { min-width: 0; }
+.pedido-registrar { min-height: 40px; }
+.pedido-form-grade {
+  display: grid;
+  grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+.pedido-form-campos { display: grid; gap: 10px; min-width: 0; }
+.pedido-form-horario { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pedido-form .campo select, .pedido-form .campo input { min-width: 0; min-height: 40px; padding: 8px 10px; }
 .pedido-botoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .pedido-linha { align-items: flex-start; gap: 8px 16px; }
 .pedido-linha .pedido-botoes { column-gap: 14px; }
@@ -578,6 +588,8 @@ main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .calendario-pedido button[aria-pressed="true"] { background: #0154d8; color: #fff; }
 .calendario-total { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; }
 @media (max-width: 760px) {
+  .pedido-form-grade { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .pedido-form-grade .calendario-pedido { width: 100%; }
   .pedido-linha { flex-wrap: wrap; }
   .pedido-linha .linha-texto { flex-basis: 100%; }
   .pedido-linha .pedido-botoes { justify-content: flex-start; }

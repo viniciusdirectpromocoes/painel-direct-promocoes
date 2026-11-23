@@ -45,7 +45,12 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
   const [erro, setErro] = useState("");
   const tituloForm = useRef<HTMLHeadingElement>(null);
   const tituloFormId = form ? form.id ?? "novo" : null;
-  const setores = [...new Set([...SETORES, ...dados.setoresExtras, ...(form?.setor ? [form.setor] : [])])];
+  const setores = [...new Set([
+    ...SETORES,
+    ...dados.setoresExtras,
+    ...dados.diaristas.flatMap((diarista) => diarista.setores ?? []),
+    form?.setor ?? "",
+  ].map((setor) => setor.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
   const lojas = [...dados.lojas].sort((a, b) => a.rede.localeCompare(b.rede) || a.nome.localeCompare(b.nome));
   const diaristas = [...dados.diaristas].sort((a, b) => a.nome.localeCompare(b.nome));
   const lojasPorId = new Map(lojas.map((loja) => [loja.id, loja]));
@@ -54,6 +59,16 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
   useEffect(() => {
     if (tituloFormId) tituloForm.current?.focus();
   }, [tituloFormId]);
+
+  function abrirCadastro() {
+    setErro("");
+    setForm(vazio);
+  }
+
+  function atualizar<K extends keyof Form>(campo: K, valor: Form[K]) {
+    setErro("");
+    setForm((atual) => atual && { ...atual, [campo]: valor });
+  }
 
   function editar(pedido: Pedido) {
     setErro("");
@@ -71,8 +86,16 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
   function salvar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     if (!form) return;
-    if (!lojasPorId.has(form.lojaId) || !form.setor || !form.horaInicio || !form.horaFim) {
-      setErro("Preencha a loja, o setor e os horários.");
+    if (!lojasPorId.has(form.lojaId)) {
+      setErro(lojas.length ? "Selecione uma loja." : "Cadastre uma loja antes de registrar um pedido.");
+      return;
+    }
+    if (!form.setor) {
+      setErro("Selecione um setor.");
+      return;
+    }
+    if (!form.horaInicio || !form.horaFim) {
+      setErro("Informe os horários de início e fim.");
       return;
     }
     if (form.horaInicio === form.horaFim) {
@@ -133,57 +156,59 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
         <div className="painel-topo">
           <h2>Pedidos registrados</h2>
           {!form && (
-            <button type="button" className="botao mais verde mini" onClick={() => { setErro(""); setForm(vazio); }}>
+            <button type="button" className="botao primario mini pedido-registrar" onClick={abrirCadastro}>
               + Registrar pedido
             </button>
           )}
         </div>
 
         {form && (
-          <form className="secao pedido-form" onSubmit={salvar} aria-labelledby="titulo-pedido">
+          <form className="secao pedido-form" onSubmit={salvar} aria-labelledby="titulo-pedido" noValidate>
             <h3 id="titulo-pedido" ref={tituloForm} tabIndex={-1}>{form.id ? "Editar pedido" : "Novo pedido"}</h3>
             {lojas.length === 0 && <p className="muted">Cadastre uma loja antes de registrar um pedido.</p>}
-            <div className="campo-duplo">
-              <label className="campo">
-                <span>Loja</span>
-                <select value={form.lojaId} onChange={(e) => setForm({ ...form, lojaId: e.target.value })} required>
-                  <option value="">Selecione uma loja</option>
-                  {lojas.map((loja) => <option key={loja.id} value={loja.id}>{loja.rede} · {loja.nome}</option>)}
-                </select>
-              </label>
-              <label className="campo">
-                <span>Setor</span>
-                <select value={form.setor} onChange={(e) => setForm({ ...form, setor: e.target.value })} required>
-                  <option value="">Selecione um setor</option>
-                  {setores.map((setor) => <option key={setor}>{setor}</option>)}
-                </select>
-              </label>
+            <div className="pedido-form-grade">
+              <CalendarioPedido key={tituloFormId} datas={form.datas} onChange={(datas) => atualizar("datas", datas)} />
+              <div className="pedido-form-campos">
+                <label className="campo">
+                  <span>Loja</span>
+                  <select value={form.lojaId} onChange={(e) => atualizar("lojaId", e.target.value)} required>
+                    <option value="">Selecione uma loja</option>
+                    {lojas.map((loja) => <option key={loja.id} value={loja.id}>{loja.rede} · {loja.nome}</option>)}
+                  </select>
+                </label>
+                <label className="campo">
+                  <span>Setor</span>
+                  <select value={form.setor} onChange={(e) => atualizar("setor", e.target.value)} required>
+                    <option value="">Selecione um setor</option>
+                    {setores.map((setor) => <option key={setor}>{setor}</option>)}
+                  </select>
+                </label>
+                <div className="pedido-form-horario">
+                  <label className="campo">
+                    <span>Horário de início</span>
+                    <input type="time" value={form.horaInicio} onChange={(e) => atualizar("horaInicio", e.target.value)} required />
+                  </label>
+                  <label className="campo">
+                    <span>Horário de fim</span>
+                    <input type="time" value={form.horaFim} onChange={(e) => atualizar("horaFim", e.target.value)} required />
+                  </label>
+                </div>
+                {form.horaInicio && form.horaFim && form.horaFim < form.horaInicio && <p className="muted">O turno termina no dia seguinte.</p>}
+                <label className="campo">
+                  <span>Diarista (opcional)</span>
+                  <select value={form.diaristaId} onChange={(e) => atualizar("diaristaId", e.target.value)}>
+                    <option value="">A definir</option>
+                    {diaristas.map((diarista) => (
+                      <option key={diarista.id} value={diarista.id}>{diarista.nome}{diarista.bloqueada ? " (bloqueado)" : ""}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
-            <div className="campo-duplo">
-              <label className="campo">
-                <span>Horário de início</span>
-                <input type="time" value={form.horaInicio} onChange={(e) => setForm({ ...form, horaInicio: e.target.value })} required />
-              </label>
-              <label className="campo">
-                <span>Horário de fim</span>
-                <input type="time" value={form.horaFim} onChange={(e) => setForm({ ...form, horaFim: e.target.value })} required />
-              </label>
-            </div>
-            {form.horaInicio && form.horaFim && form.horaFim < form.horaInicio && <p className="muted">O turno termina no dia seguinte.</p>}
-            <CalendarioPedido key={tituloFormId} datas={form.datas} onChange={(datas) => setForm({ ...form, datas })} />
-            <label className="campo">
-              <span>Diarista (opcional)</span>
-              <select value={form.diaristaId} onChange={(e) => setForm({ ...form, diaristaId: e.target.value })}>
-                <option value="">A definir</option>
-                {diaristas.map((diarista) => (
-                  <option key={diarista.id} value={diarista.id}>{diarista.nome}{diarista.bloqueada ? " (bloqueado)" : ""}</option>
-                ))}
-              </select>
-            </label>
             {erro && <p role="alert" className="aviso-texto">{erro}</p>}
             <div className="pedido-botoes">
               <button type="button" className="botao secundario" onClick={() => setForm(null)}>Cancelar</button>
-              <button type="submit" className="botao mais verde" disabled={lojas.length === 0}>Salvar pedido</button>
+              <button type="submit" className="botao primario">Salvar pedido</button>
             </div>
           </form>
         )}
