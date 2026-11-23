@@ -131,7 +131,7 @@ type AreaProps = { usuario: Usuario; sair: () => void; tema: "claro" | "escuro";
 function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
   const { dados, setDados, carregado, erroSync } = useDados(usuario.id);
   const [pagina, setPagina] = useState<Pagina>("painel");
-  const [recolhida, setRecolhida] = useState(true);
+  const [recolhida, setRecolhida] = useState(false);
   const [aviso, setAviso] = useState<{ texto: string; id: number } | null>(null);
 
   const indice = PAGINAS.findIndex((p) => p.id === pagina);
