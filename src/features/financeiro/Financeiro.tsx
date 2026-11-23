@@ -1,3 +1,4 @@
+import { centavos, alocarNasDiarias, aplicarAlocacoes, reverterAlocacoes } from '../../core/financeiro';
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Dados, CategoriaLancamento, Lancamento, SetDados, TipoAdiantamento } from "../../core/types";
 import { upsert } from "../../core/store";
@@ -8,8 +9,6 @@ import { AnimatedNumber } from "../../components/AnimatedNumber";
 import "../../styles/forms.css";
 
 type Props = { dados: Dados; setDados: SetDados; notificar: (t: string) => void };
-
-type Alocacao = { diariaId: string; valor: number };
 
 type Form = {
   categoria: CategoriaLancamento;
@@ -53,9 +52,6 @@ const dataSemAno = (iso: string) => {
   return d && m ? `${d}/${m}` : iso;
 };
 
-/** Arredonda para centavos, evitando erros de ponto flutuante. */
-const centavos = (n: number) => Math.round(n * 100) / 100;
-
 /** Quanto uma diarista tem pendente, somando todas as suas diárias. */
 function pendenteDaDiarista(lancamentos: Lancamento[], diaristaId: string) {
   return centavos(
@@ -63,42 +59,6 @@ function pendenteDaDiarista(lancamentos: Lancamento[], diaristaId: string) {
       .filter((l) => l.categoria === "Diárias" && l.diaristaId === diaristaId)
       .reduce((s, l) => s + pendenteDaDiaria(l), 0),
   );
-}
-
-/**
- * Desconta um valor das diárias pendentes da diarista, começando pela mais antiga.
- * Devolve as alocações feitas, quanto foi descontado e quanto sobrou.
- */
-function alocarNasDiarias(lancamentos: Lancamento[], diaristaId: string, valor: number) {
-  const pendentes = lancamentos
-    .filter((l) => l.categoria === "Diárias" && l.diaristaId === diaristaId && pendenteDaDiaria(l) > 0)
-    .sort((a, b) => (a.diasTrabalhados[0] ?? "").localeCompare(b.diasTrabalhados[0] ?? ""));
-
-  let restante = centavos(valor);
-  const alocacoes: Alocacao[] = [];
-  for (const d of pendentes) {
-    if (restante <= 0) break;
-    const tirar = centavos(Math.min(pendenteDaDiaria(d), restante));
-    alocacoes.push({ diariaId: d.id, valor: tirar });
-    restante = centavos(restante - tirar);
-  }
-  return { alocacoes, descontado: centavos(valor - restante), restante };
-}
-
-/** Soma uma alocação de volta nas diárias. */
-function aplicarAlocacoes(lancamentos: Lancamento[], alocacoes: Alocacao[]) {
-  return lancamentos.map((x) => {
-    const a = alocacoes.find((y) => y.diariaId === x.id);
-    return a ? { ...x, pagoValor: centavos((x.pagoValor ?? 0) + a.valor) } : x;
-  });
-}
-
-/** Tira uma alocação das diárias (usado ao excluir ou editar). */
-function reverterAlocacoes(lancamentos: Lancamento[], alocacoes: Alocacao[]) {
-  return lancamentos.map((x) => {
-    const a = alocacoes.find((y) => y.diariaId === x.id);
-    return a ? { ...x, pagoValor: centavos(Math.max(0, (x.pagoValor ?? 0) - a.valor)) } : x;
-  });
 }
 
 export function Financeiro({ dados, setDados, notificar }: Props) {
@@ -238,7 +198,8 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
       const semAntigo = dados.lancamentos.filter((l) => l.id !== editandoId);
       const base = antigo?.alocacoes ? reverterAlocacoes(semAntigo, antigo.alocacoes) : semAntigo;
 
-      const { alocacoes, descontado, restante } = alocarNasDiarias(base, form.diaristaId, valorNumerico);
+      const referenciaPagamento = antigo?.diaristaId === form.diaristaId ? antigo?.referenciaPagamento : undefined;
+      const { alocacoes, descontado, restante } = alocarNasDiarias(base, form.diaristaId, valorNumerico, referenciaPagamento);
       const comDesconto = aplicarAlocacoes(base, alocacoes);
       const comum = {
         id: editandoId ?? uid(),
@@ -252,6 +213,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         rede: "",
         diaristaId: form.diaristaId,
         alocacoes,
+        referenciaPagamento,
       };
 
       let item: Lancamento;
@@ -413,6 +375,13 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                 const descontado = centavos((l.alocacoes ?? []).reduce((s, a) => s + a.valor, 0));
                 const sobra = centavos(l.valor - descontado);
                 const rotulo = l.categoria === "Pagamento" ? "Pagamento" : "Adiantamento";
+                const referencia = l.referenciaPagamento;
+                const lojaReferencia = dados.lojas.find((loja) => loja.id === referencia?.lojaId);
+                const detalhes = [
+                  lojaReferencia && `${lojaReferencia.rede} · ${lojaReferencia.nome}`,
+                  referencia?.quantidade && `${referencia.quantidade} ${referencia.quantidade === 1 ? "diária" : "diárias"}`,
+                  referencia?.dias.length && referencia.dias.map(dataCurta).join(", "),
+                ].filter(Boolean).join(" · ");
                 return (
                   <li key={l.id} className="linha">
                     <span className="bolinha amber" />
@@ -421,6 +390,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                         {rotulo}: {l.descricao}
                       </strong>
                       <span className="muted">{dataCurta(l.data)}</span>
+                      {detalhes && <span className="muted">{detalhes}</span>}
                       <span className="muted">
                         Descontado das diárias: {moeda(descontado)}
                         {sobra > 0 ? ` · Sobra como adiantamento: ${moeda(sobra)}` : ""}

@@ -47,6 +47,13 @@ export type Pedido = {
   intervaloInicio?: string;
   intervaloFim?: string;
   diaristaId?: string;
+  quantidadeDiaristas?: number;
+};
+
+export type ReferenciaPagamento = {
+  dias: string[];
+  lojaId?: string;
+  quantidade?: number;
 };
 
 export type Jornada = {
@@ -88,6 +95,7 @@ export type Lancamento = {
   alocacoes?: { diariaId: string; valor: number }[];
   // Adiantamento: se é de passagem ou de diária
   tipoAdiantamento?: TipoAdiantamento;
+  referenciaPagamento?: ReferenciaPagamento;
 };
 
 export type Dados = {
@@ -102,6 +110,6 @@ export type Dados = {
   jornadas: Record<string, Jornada>;
 };
 
-export type Pagina = "painel" | "diaristas" | "lojas" | "pedidos" | "operacao" | "financeiro";
+export type Pagina = "painel" | "diaristas" | "lojas" | "pedidos" | "operacao" | "financeiro" | "assistente";
 
 export type SetDados = Dispatch<SetStateAction<Dados>>;

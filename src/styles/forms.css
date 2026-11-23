@@ -552,6 +552,26 @@ main .kpis.painel-resumo { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 main .painel-secoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .painel-secoes .linha > :last-child { flex-shrink: 0; }
 .pedido-form { display: grid; gap: 14px; }
+.assistente-painel { width: min(100%, 850px); min-width: 0; }
+.assistente-conversa { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; max-height: 220px; overflow: auto; }
+.assistente-balao {
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--panel-2);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.assistente-balao p { margin: 4px 0 0; white-space: pre-wrap; }
+.assistente-usuario { justify-self: end; background: var(--hover-soft); }
+.assistente-rascunho { display: grid; gap: 12px; min-width: 0; padding: 12px; border: 1px solid var(--line-strong); border-radius: 12px; }
+.assistente-dados { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 10px; margin: 0; font-size: 14px; }
+.assistente-dados dt { color: var(--muted); }
+.assistente-dados dd { margin: 0; overflow-wrap: anywhere; }
+.assistente-compor { display: grid; justify-items: start; gap: 10px; }
+.assistente-compor .campo { width: 100%; min-width: 0; }
+.assistente-compor textarea { min-height: 84px; }
 .pedido-form .campo { min-width: 0; }
 .pedido-registrar { min-height: 40px; }
 .pedido-form-grade {
@@ -838,7 +858,7 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
 
   aside.side .nav {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 4px;
     width: 100%;
   }
@@ -848,7 +868,7 @@ aside.side .nav-marca svg { width: 18px; height: 18px; }
     gap: 3px;
     height: 58px;
     padding: 0 2px;
-    font-size: 11px;
+    font-size: clamp(9px, 2.4vw, 11px);
     font-weight: 500;
     border-radius: 14px;
   }

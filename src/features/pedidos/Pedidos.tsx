@@ -14,10 +14,12 @@ type Form = {
   setor: string;
   datas: string[];
   horaInicio: string;
+  horaFim?: string;
   diaristaId: string;
+  quantidadeDiaristas: number;
 };
 
-const vazio: Form = { lojaId: "", setor: "", datas: [], horaInicio: "", diaristaId: "" };
+const vazio: Form = { lojaId: "", setor: "", datas: [], horaInicio: "", diaristaId: "", quantidadeDiaristas: 1 };
 
 function datasDoPedido(pedido: Pedido): string[] {
   if (pedido.datas) return pedido.datas;
@@ -87,7 +89,9 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       setor: setorPadraoDoPedido(pedido.setor, setores),
       datas: datasDoPedido(pedido),
       horaInicio: pedido.horaInicio ?? "",
+      horaFim: pedido.horaFim,
       diaristaId: pedido.diaristaId ?? "",
+      quantidadeDiaristas: pedido.quantidadeDiaristas ?? 1,
     });
   }
 
@@ -123,13 +127,17 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       setErro("Selecione um setor.");
       return;
     }
-    const horaFim = calcularHoraFim(form.horaInicio);
+    const horaFim = form.horaFim || calcularHoraFim(form.horaInicio);
     if (!horaFim) {
       setErro("Informe o horário de início.");
       return;
     }
     if (!form.datas.length) {
       setErro("Selecione ao menos uma data no calendário.");
+      return;
+    }
+    if (!Number.isInteger(form.quantidadeDiaristas) || form.quantidadeDiaristas < 1 || form.quantidadeDiaristas > 99) {
+      setErro("Informe de 1 a 99 diaristas.");
       return;
     }
     const pedido: Pedido = {
@@ -143,6 +151,7 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       horaInicio: form.horaInicio,
       horaFim,
       diaristaId: diaristasPorId.has(form.diaristaId) ? form.diaristaId : undefined,
+      quantidadeDiaristas: form.quantidadeDiaristas,
     };
     setDados((atual) => ({ ...atual, pedidos: upsert(atual.pedidos, pedido) }));
     setForm(null);
@@ -159,7 +168,8 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
       `Setor: ${setorPadraoDoPedido(pedido.setor, setores) || pedido.setor}`,
       `Horário: ${horarioPedido(pedido)}`,
       `Datas: ${datas.map(dataCurta).join(", ")}`,
-      rotuloDiarias(datas.length),
+      rotuloDiarias(datas.length * (pedido.quantidadeDiaristas ?? 1)),
+      `Diaristas por dia: ${pedido.quantidadeDiaristas ?? 1}`,
       diarista ? `Diarista: ${diarista.nome}` : "Diarista a definir",
     ].filter(Boolean).join("\n");
     notificar(await copiarTexto(texto) ? "Pedido copiado" : "Não foi possível copiar o pedido.");
@@ -239,7 +249,11 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
                     </div>
                   </div>
                 )}
-                <CamposJornada inicio={form.horaInicio} atualizar={(inicio) => atualizar("horaInicio", inicio)} />
+                <CamposJornada inicio={form.horaInicio} fimInformado={form.horaFim} atualizar={(inicio) => setForm({ ...form, horaInicio: inicio, horaFim: undefined })} />
+                <label className="campo">
+                  <span>Diaristas por dia</span>
+                  <input type="number" min="1" max="99" value={form.quantidadeDiaristas || ""} onChange={(e) => atualizar("quantidadeDiaristas", Number(e.target.value))} />
+                </label>
                 <label className="campo">
                   <span>Diarista (opcional)</span>
                   <select value={form.diaristaId} onChange={(e) => atualizar("diaristaId", e.target.value)}>
@@ -278,7 +292,8 @@ export function Pedidos({ dados, setDados, notificar }: Props) {
                 <li key={pedido.id} className="linha pedido-linha">
                   <div className="linha-texto">
                     <strong>{loja ? `${loja.rede} · ${loja.nome}` : "Loja não cadastrada"}</strong>
-                    <span className="muted">{setorPadraoDoPedido(pedido.setor, setores) || pedido.setor} · {horarioPedido(pedido)} · {rotuloDiarias(datas.length)}</span>
+                    <span className="muted">{setorPadraoDoPedido(pedido.setor, setores) || pedido.setor} · {horarioPedido(pedido)} · {rotuloDiarias(datas.length * (pedido.quantidadeDiaristas ?? 1))}</span>
+                    {(pedido.quantidadeDiaristas ?? 1) > 1 && <span className="muted">{pedido.quantidadeDiaristas} diaristas por dia</span>}
                     <span className="muted">{datas.map(dataCurta).join(", ")}</span>
                     <span className="muted">{diarista ? diarista.nome : "Diarista a definir"}</span>
                   </div>

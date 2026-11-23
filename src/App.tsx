@@ -9,6 +9,7 @@ import { Diaristas } from "./features/diaristas/Diaristas";
 import { Lojas } from "./features/lojas/Lojas";
 import { Pedidos } from "./features/pedidos/Pedidos";
 import { Operacao } from "./features/operacao/Operacao";
+import { Assistente } from "./features/assistente/Assistente";
 import { Financeiro } from "./features/financeiro/Financeiro";
 
 const ICONE_BASE = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true };
@@ -81,6 +82,16 @@ const PAGINAS: { id: Pagina; rotulo: string; icone: ReactNode }[] = [
         <rect x="2.5" y="6" width="19" height="13" rx="3" />
         <path d="M16 12.5h2.5" />
         <path d="M6 6V5a2 2 0 0 1 2-2h8.5" />
+      </svg>
+    ),
+  },
+  {
+    id: "assistente",
+    rotulo: "Assistente",
+    icone: (
+      <svg {...ICONE_BASE}>
+        <path d="M20 11a8 8 0 0 1-8 8 9 9 0 0 1-3.4-.7L4 20l1.2-4A8 8 0 1 1 20 11Z" />
+        <path d="M8.5 10h7m-7 3h4" />
       </svg>
     ),
   },
@@ -253,6 +264,7 @@ function AreaLogada({ usuario, sair, tema, alternarTema }: AreaProps) {
         {pagina === "pedidos" && <Pedidos dados={dados} setDados={setDados} notificar={notificar} />}
         {pagina === "operacao" && <Operacao dados={dados} />}
         {pagina === "financeiro" && <Financeiro dados={dados} setDados={setDados} notificar={notificar} />}
+        {pagina === "assistente" && <Assistente dados={dados} setDados={setDados} notificar={notificar} />}
       </main>
 
       {erroSync && (

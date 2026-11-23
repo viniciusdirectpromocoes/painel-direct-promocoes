@@ -1,7 +1,8 @@
 import { calcularHoraFim } from "../core/operacao";
 
-export function CamposJornada({ inicio, atualizar }: { inicio: string; atualizar: (inicio: string) => void }) {
-  const fim = calcularHoraFim(inicio);
+export function CamposJornada({ inicio, fimInformado, atualizar }: { inicio: string; fimInformado?: string; atualizar: (inicio: string) => void }) {
+  const fimPadrao = calcularHoraFim(inicio);
+  const fim = fimInformado || fimPadrao;
   return (
     <>
       <div className="pedido-form-horario">
@@ -15,7 +16,7 @@ export function CamposJornada({ inicio, atualizar }: { inicio: string; atualizar
         </label>
       </div>
       <p className="muted jornada-nota">
-        7h20 de trabalho + 1h de intervalo
+        {fim === fimPadrao ? "7h20 de trabalho + 1h de intervalo" : "Horário informado no pedido"}
         {fim && fim < inicio ? " · Saída no dia seguinte" : ""}
       </p>
     </>

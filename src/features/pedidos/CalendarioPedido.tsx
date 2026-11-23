@@ -5,7 +5,11 @@ const diaCompleto = new Intl.DateTimeFormat("pt-BR", { dateStyle: "full", timeZo
 const mesCompleto = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
 const semana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-export function CalendarioPedido({ datas, onChange }: { datas: string[]; onChange: (datas: string[]) => void }) {
+export function CalendarioPedido({ datas, onChange, titulo = "Datas do pedido" }: {
+  datas: string[];
+  onChange: (datas: string[]) => void;
+  titulo?: string;
+}) {
   const [mes, setMes] = useState(() => new Date(`${(datas[0] ?? hoje()).slice(0, 7)}-01T00:00:00Z`));
   const ano = mes.getUTCFullYear();
   const numeroMes = mes.getUTCMonth();
@@ -23,7 +27,7 @@ export function CalendarioPedido({ datas, onChange }: { datas: string[]; onChang
 
   return (
     <fieldset className="calendario-pedido">
-      <legend>Datas do pedido</legend>
+      <legend>{titulo}</legend>
       <div className="calendario-mes">
         <button type="button" onClick={() => mudarMes(-1)} aria-label="Mês anterior">‹</button>
         <strong aria-live="polite">{mesCompleto.format(mes)}</strong>
