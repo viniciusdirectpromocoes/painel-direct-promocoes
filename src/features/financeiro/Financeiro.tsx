@@ -6,6 +6,7 @@ import { dataCurta, hoje, lerValor, moeda, uid } from "../../core/format";
 import { FORMA_PAGAMENTO, SETORES, VALOR_DIARIA } from "../../core/constants";
 import { textoDiarias, quantidadeDiarias, pendenteDaDiaria } from "../../core/regras";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
+import { redesDasLojas } from "../../core/redes";
 import { agruparDividas, DividasAgrupadas } from "./DividasAgrupadas";
 import "../../styles/forms.css";
 
@@ -85,8 +86,8 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
   const [busca, setBusca] = useState("");
 
   const todosSetores = useMemo(() => [...SETORES, ...dados.setoresExtras], [dados.setoresExtras]);
-  const redes = useMemo(
-    () => [...new Set(dados.lojas.map((loja) => loja.rede.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR")),
+  const coresDasRedes = useMemo(
+    () => new Map(redesDasLojas(dados.lojas).map(({ nome, cor }) => [nome, cor])),
     [dados.lojas],
   );
 
@@ -435,7 +436,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
             {lista.map((linha) => {
               if ("grupo" in linha) {
                 return (
-                  <DividasAgrupadas key={linha.grupo.chave} grupo={linha.grupo} pagar={marcarComoPago} editar={editar} excluir={excluir} />
+                  <DividasAgrupadas key={linha.grupo.chave} grupo={linha.grupo} coresDasRedes={coresDasRedes} pagar={marcarComoPago} editar={editar} excluir={excluir} />
                 );
               }
               const l = linha.lancamento;
@@ -597,8 +598,8 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                       <span>Rede do supermercado (opcional)</span>
                       <select value={form.rede} onChange={(e) => atualizar("rede", e.target.value)}>
                         <option value="">Selecione a rede</option>
-                        {form.rede && !redes.includes(form.rede) && <option>{form.rede}</option>}
-                        {redes.map((rede) => <option key={rede}>{rede}</option>)}
+                        {form.rede && !coresDasRedes.has(form.rede) && <option>{form.rede}</option>}
+                        {[...coresDasRedes.keys()].map((rede) => <option key={rede}>{rede}</option>)}
                       </select>
                     </label>
                   </div>

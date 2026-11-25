@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import { centavos } from "../../core/financeiro";
 import { dataCurta, moeda } from "../../core/format";
+import type { CorRede } from "../../core/redes";
 import type { Diarista, Lancamento } from "../../core/types";
 
 type GrupoDividas = { chave: string; nome: string; itens: Lancamento[] };
@@ -58,17 +59,26 @@ function AcoesDivida({ item, pagar, editar, excluir }: Acoes & { item: Lancament
   );
 }
 
-export function DividasAgrupadas({ grupo, ...acoes }: Acoes & { grupo: GrupoDividas }) {
+export function DividasAgrupadas({ grupo, coresDasRedes, ...acoes }: Acoes & {
+  grupo: GrupoDividas;
+  coresDasRedes: ReadonlyMap<string, CorRede>;
+}) {
   const [aberto, setAberto] = useState(false);
   const detalhesId = useId();
-  const porRede = new Map<string, { nome: string; valor: number }>();
+  const porRede = new Map<string, { nome: string; valor: number; cor?: CorRede }>();
   let total = 0;
   let pendente = 0;
   for (const item of grupo.itens) {
-    const nome = item.rede?.trim() || "Sem rede";
+    const redeCadastrada = item.rede?.trim();
+    const nome = redeCadastrada || "Sem rede";
     const chave = normalizar(nome);
     const soma = porRede.get(chave);
-    porRede.set(chave, { nome: soma?.nome ?? nome, valor: centavos((soma?.valor ?? 0) + item.valor) });
+    const cor = redeCadastrada ? coresDasRedes.get(redeCadastrada) : undefined;
+    porRede.set(chave, {
+      nome: soma?.nome ?? nome,
+      valor: centavos((soma?.valor ?? 0) + item.valor),
+      cor: soma?.cor ?? cor,
+    });
     total = centavos(total + item.valor);
     if (!item.pagoEm) pendente = centavos(pendente + item.valor);
   }
@@ -110,7 +120,7 @@ export function DividasAgrupadas({ grupo, ...acoes }: Acoes & { grupo: GrupoDivi
       )}
       <dl className="financeiro-redes-divida" aria-label="Valores por rede">
         {[...porRede.entries()].map(([chave, rede]) => (
-          <div key={chave}>
+          <div key={chave} data-cor-rede={rede.cor}>
             <dt title={rede.nome}>{rede.nome}</dt>
             <dd>{moeda(rede.valor)}</dd>
           </div>

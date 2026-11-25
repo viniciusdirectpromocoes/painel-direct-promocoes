@@ -188,11 +188,11 @@ button.financeiro-divida-cabecalho:focus-visible { outline: 2px solid var(--bran
   min-width: 0;
   padding: 5px 8px;
   border-radius: 8px;
-  background: var(--field-soft);
+  background: var(--rede-cor, var(--field-soft));
   font-size: 12px;
 }
-.financeiro-redes-divida dt { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.financeiro-redes-divida dd { margin: 0; color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.financeiro-redes-divida dt { color: var(--rede-texto, var(--muted)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.financeiro-redes-divida dd { margin: 0; color: var(--rede-texto, var(--ink)); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .financeiro-divida-rodape {
   display: flex;
   align-items: center;
@@ -368,11 +368,13 @@ button.financeiro-divida-cabecalho:focus-visible { outline: 2px solid var(--bran
 }
 .lojas-rede strong { font-size: 14px; }
 .lojas-rede span { font-size: 13px; }
-.lojas-rede:nth-child(6n + 2) { --rede-cor: var(--card-verde); --rede-texto: var(--card-texto-escuro); }
-.lojas-rede:nth-child(6n + 3) { --rede-cor: var(--card-laranja); --rede-texto: var(--card-texto-escuro); }
-.lojas-rede:nth-child(6n + 4) { --rede-cor: var(--card-roxo); }
-.lojas-rede:nth-child(6n + 5) { --rede-cor: var(--card-rosa); }
-.lojas-rede:nth-child(6n + 6) { --rede-cor: var(--card-ciano); --rede-texto: var(--card-texto-escuro); }
+[data-cor-rede] { --rede-texto: #fff; }
+[data-cor-rede="azul"] { --rede-cor: var(--card-azul); }
+[data-cor-rede="verde"] { --rede-cor: var(--card-verde); --rede-texto: var(--card-texto-escuro); }
+[data-cor-rede="laranja"] { --rede-cor: var(--card-laranja); --rede-texto: var(--card-texto-escuro); }
+[data-cor-rede="roxo"] { --rede-cor: var(--card-roxo); }
+[data-cor-rede="rosa"] { --rede-cor: var(--card-rosa); }
+[data-cor-rede="ciano"] { --rede-cor: var(--card-ciano); --rede-texto: var(--card-texto-escuro); }
 .loja-cel-endereco { overflow-wrap: anywhere; }
 .loja-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; }
 .loja-acoes .link { text-align: left; }

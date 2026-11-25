@@ -3,6 +3,7 @@ import type { Dados, Loja, SetDados } from "../../core/types";
 import { upsert } from "../../core/store";
 import { uid } from "../../core/format";
 import { copiarTexto } from "../../core/clipboard";
+import { redesDasLojas } from "../../core/redes";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
 import "../../styles/forms.css";
 
@@ -42,11 +43,7 @@ export function Lojas({ dados, setDados, notificar }: Props) {
   const totalLojas = dados.lojas.length;
 
   // Lojas agrupadas por rede, em ordem alfabética.
-  const lojasPorRede = useMemo(() => {
-    const mapa = new Map<string, number>();
-    dados.lojas.forEach((l) => mapa.set(l.rede, (mapa.get(l.rede) ?? 0) + 1));
-    return [...mapa.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [dados.lojas]);
+  const lojasPorRede = useMemo(() => redesDasLojas(dados.lojas), [dados.lojas]);
 
   const totalRedes = lojasPorRede.length;
 
@@ -140,10 +137,10 @@ export function Lojas({ dados, setDados, notificar }: Props) {
 
       {lojasPorRede.length > 0 && (
         <ul className="lojas-redes rise" aria-label="Quantidade de lojas por rede">
-          {lojasPorRede.map(([rede, qtd]) => (
-            <li key={rede} className="lojas-rede">
-              <strong>{rede}</strong>
-              <span>{qtd} {qtd === 1 ? "loja" : "lojas"}</span>
+          {lojasPorRede.map(({ nome, quantidade, cor }) => (
+            <li key={nome} className="lojas-rede" data-cor-rede={cor}>
+              <strong>{nome}</strong>
+              <span>{quantidade} {quantidade === 1 ? "loja" : "lojas"}</span>
             </li>
           ))}
         </ul>
