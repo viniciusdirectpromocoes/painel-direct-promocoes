@@ -1,4 +1,4 @@
-import { centavos, alocarNasDiarias, aplicarAlocacoes, reverterAlocacoes } from '../../core/financeiro';
+import { centavos, alocarNasDiarias, aplicarAlocacoes, reverterAlocacoes, ehSaida, valorEmAberto } from "../../core/financeiro";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Dados, CategoriaLancamento, Lancamento, SetDados, TipoAdiantamento } from "../../core/types";
 import { upsert } from "../../core/store";
@@ -28,6 +28,16 @@ const OPCOES: { valor: CategoriaLancamento; rotulo: string }[] = [
   { valor: "Recebimento", rotulo: "Recebimento da empresa" },
   { valor: "Pagamento", rotulo: "Pagamento a diarista" },
   { valor: "Adiantamento", rotulo: "Adiantamento" },
+  { valor: "Dívida", rotulo: "Dívida a diarista" },
+];
+
+type Filtro = "todos" | CategoriaLancamento | "pendentes" | "pagos";
+
+const FILTROS: { valor: Filtro; rotulo: string }[] = [
+  { valor: "todos", rotulo: "Todos" },
+  ...OPCOES.filter((opcao) => opcao.valor !== "Dívida"),
+  { valor: "pendentes", rotulo: "Pendentes de pagamento" },
+  { valor: "pagos", rotulo: "Já pagos" },
 ];
 
 const TIPOS_ADIANTAMENTO: TipoAdiantamento[] = ["Passagem", "Diária"];
@@ -66,13 +76,11 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [formAberto, setFormAberto] = useState(false);
   const [erro, setErro] = useState("");
-  const [filtro, setFiltro] = useState<"todos" | CategoriaLancamento>("todos");
+  const [filtro, setFiltro] = useState<Filtro>("todos");
   const [busca, setBusca] = useState("");
 
   const todosSetores = useMemo(() => [...SETORES, ...dados.setoresExtras], [dados.setoresExtras]);
 
-  // Entrada: recebido da Direct. Saída: pagamentos e adiantamentos às diaristas.
-  // Em aberto: diárias ainda não pagas.
   const recebido = useMemo(
     () => dados.lancamentos.filter((l) => l.categoria === "Recebimento").reduce((s, l) => s + l.valor, 0),
     [dados.lancamentos],
@@ -80,25 +88,27 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
   const pago = useMemo(
     () =>
       dados.lancamentos
-        .filter((l) => l.categoria === "Pagamento" || l.categoria === "Adiantamento")
+        .filter(ehSaida)
         .reduce((s, l) => s + l.valor, 0),
     [dados.lancamentos],
   );
   const emAberto = useMemo(
     () =>
-      dados.lancamentos
-        .filter((l) => l.categoria === "Diárias")
-        .reduce((s, l) => s + pendenteDaDiaria(l), 0),
+      dados.lancamentos.reduce((s, l) => s + valorEmAberto(l), 0),
     [dados.lancamentos],
   );
 
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
     return dados.lancamentos
-      .filter((l) => filtro === "todos" || l.categoria === filtro)
+      .filter((l) => {
+        if (filtro === "pendentes") return valorEmAberto(l) > 0;
+        if (filtro === "pagos") return l.categoria === "Pagamento" || (l.categoria === "Dívida" && Boolean(l.pagoEm));
+        return filtro === "todos" || l.categoria === filtro;
+      })
       .filter((l) => l.descricao.toLowerCase().includes(termo) || l.setor.toLowerCase().includes(termo))
       .slice()
-      .sort((a, b) => (b.data || "").localeCompare(a.data || ""));
+      .sort((a, b) => (b.pagoEm || b.data || "").localeCompare(a.pagoEm || a.data || ""));
   }, [dados.lancamentos, filtro, busca]);
 
   const valorNumerico = lerValor(form.valor);
@@ -145,6 +155,10 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
 
   function validar(): string {
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) return "Informe o valor maior que zero.";
+    if (form.categoria === "Dívida") {
+      if (centavos(valorNumerico) < 0.01 || !Number.isFinite(centavos(valorNumerico))) return "Informe um valor válido em reais.";
+      if (!nomeDiarista(form.diaristaId)) return "Selecione o diarista.";
+    }
     if (form.categoria === "Diárias") {
       if (!form.diaristaId) return "Escolha a diarista.";
       if (!form.lojaId) return "Escolha a loja.";
@@ -190,6 +204,28 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
       return;
     }
     setErro("");
+
+    if (form.categoria === "Dívida") {
+      const id = editandoId ?? uid();
+      const descricao = nomeDiarista(form.diaristaId) ?? "";
+      setDados((estado) => {
+        const original = estado.lancamentos.find((l) => l.id === id);
+        const item: Lancamento = {
+          id, categoria: "Dívida", descricao, diaristaId: form.diaristaId,
+          valor: centavos(valorNumerico), formaPagamento: FORMA_PAGAMENTO,
+          setor: "", diasTrabalhados: [], diaPagamento: 0, rede: "",
+          data: original?.data ?? form.data, pagoEm: original?.pagoEm,
+        };
+        return { ...estado, lancamentos: upsert(estado.lancamentos, item) };
+      });
+      if (!editandoId) {
+        setBusca("");
+        setFiltro("pendentes");
+      }
+      notificar(editandoId ? "Dívida atualizada" : "Dívida cadastrada");
+      fecharForm();
+      return;
+    }
 
     // Pagamento e adiantamento descontam das diárias pendentes da diarista.
     if (form.categoria === "Pagamento" || form.categoria === "Adiantamento") {
@@ -295,6 +331,17 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     setFormAberto(true);
   }
 
+  function marcarComoPago(id: string) {
+    const pagoEm = hoje();
+    setDados((estado) => ({
+      ...estado,
+      lancamentos: estado.lancamentos.map((l) =>
+        l.id === id && l.categoria === "Dívida" && !l.pagoEm ? { ...l, pagoEm } : l,
+      ),
+    }));
+    notificar("Pagamento registrado em Já pagos");
+  }
+
   function excluir(l: Lancamento) {
     if (!window.confirm(`Excluir o lançamento "${l.descricao}"?`)) return;
     setDados((estado) => {
@@ -311,7 +358,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     <section>
       <header className="cabeca rise">
         <h1>Financeiro</h1>
-        <p className="muted">Diárias trabalhadas, valores recebidos da Direct, pagamentos e adiantamentos às diaristas.</p>
+        <p className="muted">Acompanhe diárias, recebimentos, pagamentos e dívidas a diaristas.</p>
       </header>
 
       <div className="kpis kpis-3">
@@ -349,7 +396,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         <div className="filtros">
           <div className="filtro-linha" role="tablist" aria-label="Filtrar por tipo">
             <span>Tipo</span>
-            {(["todos", ...OPCOES.map((o) => o.valor)] as const).map((f) => (
+            {FILTROS.map(({ valor: f, rotulo }) => (
               <button
                 key={f}
                 type="button"
@@ -358,7 +405,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                 className={`filtro-btn ${filtro === f ? "ativo" : ""}`}
                 onClick={() => setFiltro(f)}
               >
-                {f === "todos" ? "Todos" : OPCOES.find((o) => o.valor === f)?.rotulo}
+                {rotulo}
               </button>
             ))}
           </div>
@@ -371,6 +418,28 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         ) : (
           <ul className="lista">
             {lista.map((l) => {
+              if (l.categoria === "Dívida") {
+                return (
+                  <li key={l.id} className="linha">
+                    <span className={`bolinha ${l.pagoEm ? "lime" : "amber"}`} />
+                    <div className="linha-texto">
+                      <strong>{nomeDiarista(l.diaristaId) ?? l.descricao}</strong>
+                      <span className={`status ${l.pagoEm ? "pago" : "pendente"}`}>
+                        {l.pagoEm ? `Pago em ${dataCurta(l.pagoEm)}` : "Pendente de pagamento"}
+                      </span>
+                      <span className="acoes-card financeiro-acoes-divida">
+                        {!l.pagoEm && (
+                          <button type="button" className="botao primario mini" onClick={() => marcarComoPago(l.id)}>Já paguei</button>
+                        )}
+                        <button type="button" className="link" onClick={() => editar(l)}>Editar</button>
+                        <button type="button" className="link perigo" onClick={() => excluir(l)}>Excluir</button>
+                      </span>
+                    </div>
+                    <span className={l.pagoEm ? "neg nowrap" : "muted nowrap"}>{moeda(l.valor)}</span>
+                  </li>
+                );
+              }
+
               if (l.categoria === "Pagamento" || l.categoria === "Adiantamento") {
                 const descontado = centavos((l.alocacoes ?? []).reduce((s, a) => s + a.valor, 0));
                 const sobra = centavos(l.valor - descontado);
@@ -492,7 +561,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                       type="button"
                       role="radio"
                       aria-checked={form.categoria === o.valor}
-                      className={`segmento-btn ${form.categoria === o.valor ? "ativo entrada" : ""}`}
+                      className={`segmento-btn ${o.valor === "Dívida" ? "financeiro-opcao-divida" : ""} ${form.categoria === o.valor ? "ativo entrada" : ""}`}
                       onClick={() => trocarCategoria(o.valor)}
                       disabled={!!editandoId && form.categoria !== o.valor}
                     >
@@ -501,6 +570,25 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                   ))}
                 </div>
               </fieldset>
+
+              {form.categoria === "Dívida" && (
+                <fieldset className="secao">
+                  <legend>Dívida a diarista</legend>
+                  <div className="grade-form">
+                    <label className="campo">
+                      <span>Diarista</span>
+                      <select value={form.diaristaId} onChange={(e) => atualizar("diaristaId", e.target.value)}>
+                        <option value="">Selecione o diarista</option>
+                        {dados.diaristas.map((d) => <option key={d.id} value={d.id}>{d.nome}</option>)}
+                      </select>
+                    </label>
+                    <label className="campo">
+                      <span>Valor devido (R$)</span>
+                      <input inputMode="decimal" value={form.valor} onChange={(e) => atualizar("valor", e.target.value)} placeholder="0,00" />
+                    </label>
+                  </div>
+                </fieldset>
+              )}
 
               {form.categoria === "Diárias" && (
                 <>

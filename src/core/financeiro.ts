@@ -6,6 +6,16 @@ type Alocacao = { diariaId: string; valor: number };
 /** Arredonda para centavos, evitando erros de ponto flutuante. */
 export const centavos = (n: number) => Math.round(n * 100) / 100;
 
+export function valorEmAberto(item: Lancamento) {
+  if (item.categoria === "Diárias") return pendenteDaDiaria(item);
+  return item.categoria === "Dívida" && !item.pagoEm ? item.valor : 0;
+}
+
+export function ehSaida(item: Lancamento) {
+  return item.categoria === "Pagamento" || item.categoria === "Adiantamento" ||
+    (item.categoria === "Dívida" && Boolean(item.pagoEm));
+}
+
 /**
  * Desconta um valor das diárias pendentes da diarista, começando pela mais antiga.
  * Devolve as alocações feitas, quanto foi descontado e quanto sobrou.

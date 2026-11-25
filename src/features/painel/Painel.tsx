@@ -1,7 +1,8 @@
 import type { Dados, Pagina } from "../../core/types";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
 import { dataCurta, moeda } from "../../core/format";
-import { disponivel, pendenteDaDiaria, quantidadeDiarias } from "../../core/regras";
+import { disponivel, quantidadeDiarias } from "../../core/regras";
+import { ehSaida, valorEmAberto } from "../../core/financeiro";
 import { VALOR_DIARIA } from "../../core/constants";
 
 type Props = { dados: Dados; irPara: (p: Pagina) => void };
@@ -11,7 +12,7 @@ export function Painel({ dados, irPara }: Props) {
     .filter((l) => l.categoria === "Recebimento")
     .reduce((s, l) => s + l.valor, 0);
   const saidas = dados.lancamentos
-    .filter((l) => l.categoria === "Pagamento" || l.categoria === "Adiantamento")
+    .filter(ehSaida)
     .reduce((s, l) => s + l.valor, 0);
   const disponiveis = dados.diaristas.filter(disponivel).length;
   const nomes = new Map(dados.diaristas.map((d) => [d.id, d.nome]));
@@ -19,16 +20,15 @@ export function Painel({ dados, irPara }: Props) {
   let pagamentosPendentes = 0;
   let totalDiariasAPagar = 0;
 
-  for (const diaria of dados.lancamentos) {
-    if (diaria.categoria !== "Diárias") continue;
-    totalDiariasAPagar += diaria.valor;
-    const restante = pendenteDaDiaria(diaria);
+  for (const lancamento of dados.lancamentos) {
+    if (lancamento.categoria === "Diárias") totalDiariasAPagar += lancamento.valor;
+    const restante = valorEmAberto(lancamento);
     if (restante === 0) continue;
     pagamentosPendentes += restante;
 
-    const chave = diaria.diaristaId ?? diaria.id;
+    const chave = lancamento.diaristaId ?? lancamento.id;
     const pessoa = porPessoa.get(chave) ?? {
-      nome: (diaria.diaristaId && nomes.get(diaria.diaristaId)) || diaria.descricao || "Diarista não identificada",
+      nome: (lancamento.diaristaId && nomes.get(lancamento.diaristaId)) || lancamento.descricao || "Diarista não identificada",
       valor: 0,
       registros: 0,
     };
@@ -46,7 +46,7 @@ export function Painel({ dados, irPara }: Props) {
   const kpis = [
     { rotulo: "Entrada", valor: entradas, formatar: moeda, cor: "lime", detalhe: "Recebido da Direct" },
     { rotulo: "Saída", valor: saidas, formatar: moeda, cor: "red", detalhe: "Pagamentos e adiantamentos" },
-    { rotulo: "Pagamentos pendentes", valor: pagamentosPendentes, formatar: moeda, cor: "orange", detalhe: "Valor de diárias a pagar" },
+    { rotulo: "Pagamentos pendentes", valor: pagamentosPendentes, formatar: moeda, cor: "orange", detalhe: "Diárias e dívidas a pagar" },
     { rotulo: "Saldo de caixa", valor: entradas - saidas, formatar: moeda, cor: "blue", detalhe: "Entradas menos saídas" },
     { rotulo: "Diárias atendidas", valor: quantidadeDiarias(totalDiariasAPagar), formatar: formatarDiarias, cor: "pink", detalhe: `Diárias registradas a ${moeda(VALOR_DIARIA)} cada` },
     { rotulo: "Diaristas disponíveis", valor: disponiveis, formatar: formatarQuantidade, cor: "cyan", detalhe: `De ${formatarQuantidade(dados.diaristas.length)} cadastrados` },
@@ -77,7 +77,7 @@ export function Painel({ dados, irPara }: Props) {
             <h2>Pendências por pessoa</h2>
           </div>
           {pendencias.length === 0 ? (
-            <p className="vazio">Nenhuma diária com pagamento em aberto.</p>
+            <p className="vazio">Nenhum pagamento em aberto.</p>
           ) : (
             <>
               <ul className="lista">
@@ -112,16 +112,16 @@ export function Painel({ dados, irPara }: Props) {
             <ul className="lista">
               {recentes.map((l) => (
                 <li key={l.id} className="linha">
-                  <span className={`bolinha ${l.categoria === "Recebimento" ? "lime" : l.categoria === "Pagamento" ? "amber" : "cyan"}`} />
+                  <span className={`bolinha ${l.categoria === "Recebimento" ? "lime" : ehSaida(l) ? "amber" : "cyan"}`} />
                   <div className="linha-texto">
                     <strong>{l.descricao}</strong>
                     <span className="muted">
                       {l.categoria}
-                      {l.categoria === "Diárias" ? ` · dia ${l.diaPagamento}` : ` · ${dataCurta(l.data)}`}
+                      {l.categoria === "Diárias" ? ` · dia ${l.diaPagamento}` : ` · ${dataCurta(l.pagoEm || l.data)}`}
                     </span>
                   </div>
-                  <span className={l.categoria === "Recebimento" ? "pos" : (l.categoria === "Pagamento" || l.categoria === "Adiantamento") ? "neg" : "muted"}>
-                    {l.categoria === "Recebimento" ? "+" : (l.categoria === "Pagamento" || l.categoria === "Adiantamento") ? "−" : ""} {moeda(l.valor)}
+                  <span className={l.categoria === "Recebimento" ? "pos" : ehSaida(l) ? "neg" : "muted"}>
+                    {l.categoria === "Recebimento" ? "+" : ehSaida(l) ? "−" : ""} {moeda(l.valor)}
                   </span>
                 </li>
               ))}

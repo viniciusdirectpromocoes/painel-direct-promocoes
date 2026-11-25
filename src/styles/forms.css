@@ -102,6 +102,8 @@
 /* Filtros em duas linhas */
 .filtros { display: grid; gap: 8px; }
 .filtro-linha { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.acoes-card.financeiro-acoes-divida { flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.segmento .financeiro-opcao-divida { grid-column: 1 / -1; }
 .filtro-linha > span { font-size: 12px; font-weight: 700; color: var(--muted); margin-right: 4px; }
 
 /* Tabela de lojas */

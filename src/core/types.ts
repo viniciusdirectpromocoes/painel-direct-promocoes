@@ -69,7 +69,7 @@ export type TarifaSetor = { setor: string; paga: number; rede?: string };
  * Recebimento: o que a empresa (rede) mandou para a Direct.
  * Pagamento: o que já foi pago a uma diarista.
  */
-export type CategoriaLancamento = "Diárias" | "Recebimento" | "Pagamento" | "Adiantamento";
+export type CategoriaLancamento = "Diárias" | "Recebimento" | "Pagamento" | "Adiantamento" | "Dívida";
 
 export type TipoAdiantamento = "Passagem" | "Diária";
 
@@ -96,6 +96,7 @@ export type Lancamento = {
   // Adiantamento: se é de passagem ou de diária
   tipoAdiantamento?: TipoAdiantamento;
   referenciaPagamento?: ReferenciaPagamento;
+  pagoEm?: string; // dívida avulsa quitada, yyyy-mm-dd
 };
 
 export type Dados = {
