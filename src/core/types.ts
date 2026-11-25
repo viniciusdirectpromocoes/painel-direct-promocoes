@@ -86,7 +86,7 @@ export type Lancamento = {
   lojaId?: string;
   // Recebimento e Pagamento
   data: string; // yyyy-mm-dd
-  rede: string; // rede que mandou o dinheiro (Recebimento)
+  rede: string; // rede associada ao recebimento ou à dívida avulsa
   // Diárias e Pagamento
   diaristaId?: string;
   // Diárias: quanto já foi pago, descontado pelos pagamentos

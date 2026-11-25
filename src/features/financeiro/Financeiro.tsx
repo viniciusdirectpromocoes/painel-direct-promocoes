@@ -15,6 +15,7 @@ type Form = {
   diaristaId: string;
   nomeAvulso: string;
   lojaId: string;
+  rede: string;
   setor: string;
   diasTrabalhados: string[];
   novoDia: string;
@@ -48,6 +49,7 @@ const vazio = (categoria: CategoriaLancamento = "Diárias"): Form => ({
   diaristaId: "",
   nomeAvulso: "",
   lojaId: "",
+  rede: "",
   setor: "",
   diasTrabalhados: [],
   novoDia: "",
@@ -82,6 +84,10 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
   const [busca, setBusca] = useState("");
 
   const todosSetores = useMemo(() => [...SETORES, ...dados.setoresExtras], [dados.setoresExtras]);
+  const redes = useMemo(
+    () => [...new Set(dados.lojas.map((loja) => loja.rede.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [dados.lojas],
+  );
 
   const recebido = useMemo(
     () => dados.lancamentos.filter((l) => l.categoria === "Recebimento").reduce((s, l) => s + l.valor, 0),
@@ -108,7 +114,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         if (filtro === "pagos") return l.categoria === "Pagamento" || (l.categoria === "Dívida" && Boolean(l.pagoEm));
         return filtro === "todos" || l.categoria === filtro;
       })
-      .filter((l) => l.descricao.toLowerCase().includes(termo) || l.setor.toLowerCase().includes(termo))
+      .filter((l) => [l.descricao, l.setor, l.rede].some((valor) => valor?.toLowerCase().includes(termo)))
       .slice()
       .sort((a, b) => (b.pagoEm || b.data || "").localeCompare(a.pagoEm || a.data || ""));
   }, [dados.lancamentos, filtro, busca]);
@@ -219,7 +225,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         const item: Lancamento = {
           id, categoria: "Dívida", descricao: diarista?.nome ?? nomeDigitado, diaristaId: diarista?.id,
           valor: centavos(valorNumerico), formaPagamento: FORMA_PAGAMENTO,
-          setor: "", diasTrabalhados: [], diaPagamento: 0, rede: "",
+          setor: "", diasTrabalhados: [], diaPagamento: 0, rede: form.rede,
           data: original?.data ?? form.data, pagoEm: original?.pagoEm,
         };
         return { ...estado, lancamentos: upsert(estado.lancamentos, item) };
@@ -327,6 +333,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
       diaristaId: l.diaristaId ?? "",
       nomeAvulso: l.categoria === "Dívida" ? nomeDiarista(l.diaristaId) ?? l.descricao : "",
       lojaId: l.lojaId ?? "",
+      rede: l.rede ?? "",
       setor: l.setor,
       diasTrabalhados: l.diasTrabalhados,
       novoDia: "",
@@ -394,7 +401,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         <input
           className="busca"
           type="search"
-          placeholder="Buscar por diarista, loja ou setor"
+          placeholder="Buscar por diarista, rede, loja ou setor"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           aria-label="Buscar lançamentos"
@@ -431,6 +438,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                     <span className={`bolinha ${l.pagoEm ? "lime" : "amber"}`} />
                     <div className="linha-texto">
                       <strong>{nomeDiarista(l.diaristaId) ?? l.descricao}</strong>
+                      {l.rede && <span className="muted">{l.rede}</span>}
                       <span className={`status ${l.pagoEm ? "pago" : "pendente"}`}>
                         {l.pagoEm ? `Pago em ${dataCurta(l.pagoEm)}` : "Pendente de pagamento"}
                       </span>
@@ -599,6 +607,14 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                     <label className="campo">
                       <span>Valor devido (R$)</span>
                       <input inputMode="decimal" value={form.valor} onChange={(e) => atualizar("valor", e.target.value)} placeholder="0,00" />
+                    </label>
+                    <label className="campo span-2">
+                      <span>Rede do supermercado (opcional)</span>
+                      <select value={form.rede} onChange={(e) => atualizar("rede", e.target.value)}>
+                        <option value="">Selecione a rede</option>
+                        {form.rede && !redes.includes(form.rede) && <option>{form.rede}</option>}
+                        {redes.map((rede) => <option key={rede}>{rede}</option>)}
+                      </select>
                     </label>
                   </div>
                 </fieldset>
