@@ -13,6 +13,7 @@ type Props = { dados: Dados; setDados: SetDados; notificar: (t: string) => void 
 type Form = {
   categoria: CategoriaLancamento;
   diaristaId: string;
+  nomeAvulso: string;
   lojaId: string;
   setor: string;
   diasTrabalhados: string[];
@@ -45,6 +46,7 @@ const TIPOS_ADIANTAMENTO: TipoAdiantamento[] = ["Passagem", "Diária"];
 const vazio = (categoria: CategoriaLancamento = "Diárias"): Form => ({
   categoria,
   diaristaId: "",
+  nomeAvulso: "",
   lojaId: "",
   setor: "",
   diasTrabalhados: [],
@@ -157,7 +159,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) return "Informe o valor maior que zero.";
     if (form.categoria === "Dívida") {
       if (centavos(valorNumerico) < 0.01 || !Number.isFinite(centavos(valorNumerico))) return "Informe um valor válido em reais.";
-      if (!nomeDiarista(form.diaristaId)) return "Selecione o diarista.";
+      if (!form.nomeAvulso.trim()) return "Informe o nome do diarista.";
     }
     if (form.categoria === "Diárias") {
       if (!form.diaristaId) return "Escolha a diarista.";
@@ -207,11 +209,15 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
 
     if (form.categoria === "Dívida") {
       const id = editandoId ?? uid();
-      const descricao = nomeDiarista(form.diaristaId) ?? "";
+      const nomeDigitado = form.nomeAvulso.trim().replace(/\s+/g, " ");
+      const nomeNormalizado = nomeDigitado.toLocaleLowerCase("pt-BR");
+      const correspondencias = dados.diaristas.filter((d) => d.nome.trim().replace(/\s+/g, " ").toLocaleLowerCase("pt-BR") === nomeNormalizado);
+      const diarista = correspondencias.find((d) => d.id === form.diaristaId) ??
+        (correspondencias.length === 1 ? correspondencias[0] : undefined);
       setDados((estado) => {
         const original = estado.lancamentos.find((l) => l.id === id);
         const item: Lancamento = {
-          id, categoria: "Dívida", descricao, diaristaId: form.diaristaId,
+          id, categoria: "Dívida", descricao: diarista?.nome ?? nomeDigitado, diaristaId: diarista?.id,
           valor: centavos(valorNumerico), formaPagamento: FORMA_PAGAMENTO,
           setor: "", diasTrabalhados: [], diaPagamento: 0, rede: "",
           data: original?.data ?? form.data, pagoEm: original?.pagoEm,
@@ -319,6 +325,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     setForm({
       categoria: l.categoria,
       diaristaId: l.diaristaId ?? "",
+      nomeAvulso: l.categoria === "Dívida" ? nomeDiarista(l.diaristaId) ?? l.descricao : "",
       lojaId: l.lojaId ?? "",
       setor: l.setor,
       diasTrabalhados: l.diasTrabalhados,
@@ -576,11 +583,18 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
                   <legend>Dívida a diarista</legend>
                   <div className="grade-form">
                     <label className="campo">
-                      <span>Diarista</span>
-                      <select value={form.diaristaId} onChange={(e) => atualizar("diaristaId", e.target.value)}>
-                        <option value="">Selecione o diarista</option>
-                        {dados.diaristas.map((d) => <option key={d.id} value={d.id}>{d.nome}</option>)}
-                      </select>
+                      <span>Nome do diarista</span>
+                      <input
+                        type="text"
+                        list="nomes-diaristas-divida"
+                        value={form.nomeAvulso}
+                        onChange={(e) => atualizar("nomeAvulso", e.target.value)}
+                        placeholder="Digite ou escolha um nome"
+                        autoComplete="off"
+                      />
+                      <datalist id="nomes-diaristas-divida">
+                        {dados.diaristas.map((d) => <option key={d.id} value={d.nome} />)}
+                      </datalist>
                     </label>
                     <label className="campo">
                       <span>Valor devido (R$)</span>
