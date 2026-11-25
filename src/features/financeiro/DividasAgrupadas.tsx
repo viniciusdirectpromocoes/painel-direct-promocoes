@@ -1,3 +1,4 @@
+import { useId, useState } from "react";
 import { centavos } from "../../core/financeiro";
 import { dataCurta, moeda } from "../../core/format";
 import type { Diarista, Lancamento } from "../../core/types";
@@ -58,6 +59,8 @@ function AcoesDivida({ item, pagar, editar, excluir }: Acoes & { item: Lancament
 }
 
 export function DividasAgrupadas({ grupo, ...acoes }: Acoes & { grupo: GrupoDividas }) {
+  const [aberto, setAberto] = useState(false);
+  const detalhesId = useId();
   const porRede = new Map<string, { nome: string; valor: number }>();
   let total = 0;
   let pendente = 0;
@@ -71,48 +74,75 @@ export function DividasAgrupadas({ grupo, ...acoes }: Acoes & { grupo: GrupoDivi
   }
   const item = grupo.itens[0];
   const grupoUnico = grupo.itens.length === 1;
+  const situacao = pendente === 0 ? "pago" : pendente === total ? "pendente" : "parcial";
+  const rotulo = { pago: "Pago", pendente: "Em aberto", parcial: "Parcialmente pago" }[situacao];
+  const cabecalho = (
+    <>
+      <span className="financeiro-divida-identidade">
+        <strong>{grupo.nome}</strong>
+        <span className={`financeiro-divida-status ${situacao}`}>{rotulo}</span>
+      </span>
+      <span className="financeiro-divida-total">
+        <span>{situacao === "pendente" ? "A pagar" : situacao === "pago" ? "Total pago" : "Total"}</span>
+        <strong>{moeda(total)}</strong>
+      </span>
+    </>
+  );
 
   return (
-    <li className="linha financeiro-grupo-dividas">
-      <span className={`bolinha ${pendente > 0 ? "amber" : "lime"}`} />
-      <div className="linha-texto">
-        <div className="financeiro-total-divida">
-          <strong>{grupo.nome}</strong>
-          <strong className="nowrap">Total {moeda(total)}</strong>
+    <li className="financeiro-grupo-dividas" data-open={aberto}>
+      {grupoUnico ? (
+        <div className="financeiro-divida-cabecalho">{cabecalho}</div>
+      ) : (
+        <button
+          type="button"
+          className="financeiro-divida-cabecalho"
+          aria-expanded={aberto}
+          aria-controls={detalhesId}
+          onClick={() => setAberto(!aberto)}
+        >
+          {cabecalho}
+          <span className="financeiro-divida-seta" aria-hidden="true" />
+        </button>
+      )}
+      {situacao === "parcial" && (
+        <p className="financeiro-divida-rodape">{moeda(pendente)} em aberto · {moeda(centavos(total - pendente))} pagos</p>
+      )}
+      <dl className="financeiro-redes-divida" aria-label="Valores por rede">
+        {[...porRede.entries()].map(([chave, rede]) => (
+          <div key={chave}>
+            <dt>{rede.nome}</dt>
+            <dd>{moeda(rede.valor)}</dd>
+          </div>
+        ))}
+      </dl>
+      {grupoUnico ? (
+        <div className="financeiro-divida-rodape">
+          {item.pagoEm && <span>Pago em {dataCurta(item.pagoEm)}</span>}
+          <AcoesDivida item={item} {...acoes} />
         </div>
-        <dl className="financeiro-redes-divida" aria-label="Valores por rede">
-          {[...porRede.entries()].map(([chave, rede]) => (
-            <div key={chave}>
-              <dt>{rede.nome}</dt>
-              <dd className="nowrap">{moeda(rede.valor)}</dd>
-            </div>
-          ))}
-        </dl>
-        <span className={`status ${pendente > 0 ? "pendente" : "pago"}`}>
-          {pendente === 0
-            ? grupoUnico ? `Pago em ${dataCurta(item.pagoEm ?? "")}` : "Pago"
-            : pendente === total ? "Pendente de pagamento" : `${moeda(pendente)} em aberto · ${moeda(centavos(total - pendente))} pagos`}
-        </span>
-        {grupoUnico ? <AcoesDivida item={item} {...acoes} /> : (
-          <details className="financeiro-detalhes-divida">
-            <summary>Ver {grupo.itens.length} lançamentos</summary>
-            <ul className="lista">
+      ) : (
+        <div className="financeiro-detalhes-divida" id={detalhesId} aria-hidden={!aberto}>
+          <div className="financeiro-detalhes-conteudo">
+            <ul className="lista financeiro-detalhes-lista" aria-label="Lançamentos individuais">
               {grupo.itens.map((divida) => (
                 <li key={divida.id}>
-                  <div className="financeiro-total-divida">
-                    <strong>{divida.rede || "Sem rede"}</strong>
-                    <span className="nowrap">{moeda(divida.valor)}</span>
+                  <div className="financeiro-detalhes-identidade">
+                    <div>
+                      <strong>{divida.rede || "Sem rede"}</strong>
+                      <span className="muted">
+                        {divida.pagoEm ? `Pago em ${dataCurta(divida.pagoEm)}` : `Em aberto · ${dataCurta(divida.data)}`}
+                      </span>
+                    </div>
+                    <strong>{moeda(divida.valor)}</strong>
                   </div>
-                  <span className="muted">
-                    {divida.pagoEm ? `Pago em ${dataCurta(divida.pagoEm)}` : `Em aberto · ${dataCurta(divida.data)}`}
-                  </span>
                   <AcoesDivida item={divida} {...acoes} />
                 </li>
               ))}
             </ul>
-          </details>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </li>
   );
 }

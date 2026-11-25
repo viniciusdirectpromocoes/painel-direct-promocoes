@@ -102,21 +102,131 @@
 /* Filtros em duas linhas */
 .filtros { display: grid; gap: 8px; }
 .filtro-linha { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-.acoes-card.financeiro-acoes-divida { flex-wrap: wrap; align-items: center; gap: 6px 12px; }
-.linha.financeiro-grupo-dividas { align-items: flex-start; }
-.financeiro-grupo-dividas > .bolinha { margin-top: 4px; }
-.financeiro-total-divida, .financeiro-redes-divida > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 6px 12px;
+.financeiro-grupo-dividas {
+  --divida-transicao: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  min-width: 0;
+  margin: 4px 0;
+  border: 1px solid var(--linha);
+  border-radius: 14px;
+  background: var(--panel);
+  transition: border-color var(--divida-transicao);
 }
-.financeiro-total-divida { flex-wrap: wrap; }
-.financeiro-redes-divida { margin: 3px 0; font-size: 13px; }
-.financeiro-redes-divida dt { color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
-.financeiro-redes-divida dd { margin: 0; font-weight: 700; }
-.financeiro-detalhes-divida summary { cursor: pointer; width: fit-content; padding: 6px 0; font-size: 13px; }
-.financeiro-detalhes-divida li { padding: 7px 0; border-top: 1px solid var(--line); }
+.financeiro-grupo-dividas:focus-within, .financeiro-grupo-dividas[data-open="true"] {
+  border-color: color-mix(in srgb, var(--brand) 38%, var(--linha));
+}
+.financeiro-divida-cabecalho {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  padding: 12px;
+  color: var(--ink);
+  text-align: left;
+}
+button.financeiro-divida-cabecalho {
+  grid-template-columns: minmax(0, 1fr) auto 28px;
+  border: 0;
+  border-radius: 13px 13px 0 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--divida-transicao);
+}
+button.financeiro-divida-cabecalho:hover { background: var(--hover-soft); }
+button.financeiro-divida-cabecalho:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.financeiro-divida-identidade, .financeiro-divida-total { display: grid; gap: 4px; }
+.financeiro-divida-identidade > strong { font-size: 15px; overflow-wrap: anywhere; }
+.financeiro-divida-total { text-align: right; font-variant-numeric: tabular-nums; }
+.financeiro-divida-total > span { color: var(--muted); font-size: 11px; }
+.financeiro-divida-total > strong { font-size: clamp(15px, 4.2vw, 19px); white-space: nowrap; }
+.financeiro-divida-status {
+  justify-self: start;
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: #fff2dc;
+  color: #8c420e;
+  font-size: 11px;
+  font-weight: 800;
+}
+.financeiro-divida-status.pago { background: #ddf8e9; color: #14613a; }
+.financeiro-divida-status.parcial { background: #e6eeff; color: #234eb3; }
+:root[data-theme="dark"] .financeiro-divida-status { background: #49321b; color: #ffcc84; }
+:root[data-theme="dark"] .financeiro-divida-status.pago { background: #163d36; color: #8be7b2; }
+:root[data-theme="dark"] .financeiro-divida-status.parcial { background: #1c367a; color: #b4ccff; }
+.financeiro-divida-seta {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--field-soft);
+  color: var(--ink);
+  transition: transform var(--divida-transicao);
+}
+.financeiro-divida-seta::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+.financeiro-grupo-dividas[data-open="true"] .financeiro-divida-seta { transform: scaleY(-1); }
+.financeiro-redes-divida {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr));
+  gap: 5px;
+  margin: 0;
+  padding: 0 12px 12px;
+}
+.financeiro-redes-divida > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2px 8px;
+  min-width: 0;
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: var(--field-soft);
+  font-size: 12px;
+}
+.financeiro-redes-divida dt { min-width: 0; color: var(--muted); overflow-wrap: anywhere; }
+.financeiro-redes-divida dd { margin: 0; color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+.financeiro-divida-rodape {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 0;
+  padding: 0 12px 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.financeiro-detalhes-divida {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition: grid-template-rows var(--divida-transicao), opacity var(--divida-transicao);
+}
+.financeiro-grupo-dividas[data-open="true"] .financeiro-detalhes-divida {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+}
+.financeiro-detalhes-conteudo { min-height: 0; overflow: hidden; }
+.lista.financeiro-detalhes-lista { margin: 0 12px 10px; }
+.financeiro-detalhes-lista > li { padding: 8px 2px; border-top: 1px solid var(--linha); }
+.financeiro-detalhes-identidade { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.financeiro-detalhes-identidade > div { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.financeiro-detalhes-identidade > strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.acoes-card.financeiro-acoes-divida { flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .financeiro-grupo-dividas, button.financeiro-divida-cabecalho,
+  .financeiro-divida-seta, .financeiro-detalhes-divida { transition: none; }
+}
 .segmento .financeiro-opcao-divida { grid-column: 1 / -1; }
 .filtro-linha > span { font-size: 12px; font-weight: 700; color: var(--muted); margin-right: 4px; }
 
