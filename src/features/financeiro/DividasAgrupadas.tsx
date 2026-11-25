@@ -111,7 +111,7 @@ export function DividasAgrupadas({ grupo, ...acoes }: Acoes & { grupo: GrupoDivi
       <dl className="financeiro-redes-divida" aria-label="Valores por rede">
         {[...porRede.entries()].map(([chave, rede]) => (
           <div key={chave}>
-            <dt>{rede.nome}</dt>
+            <dt title={rede.nome}>{rede.nome}</dt>
             <dd>{moeda(rede.valor)}</dd>
           </div>
         ))}

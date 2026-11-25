@@ -175,25 +175,24 @@ button.financeiro-divida-cabecalho:focus-visible { outline: 2px solid var(--bran
 .financeiro-grupo-dividas[data-open="true"] .financeiro-divida-seta { transform: scaleY(-1); }
 .financeiro-redes-divida {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 5px;
   margin: 0;
   padding: 0 12px 12px;
 }
 .financeiro-redes-divida > div {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 2px 8px;
+  gap: 8px;
   min-width: 0;
   padding: 5px 8px;
   border-radius: 8px;
   background: var(--field-soft);
   font-size: 12px;
 }
-.financeiro-redes-divida dt { min-width: 0; color: var(--muted); overflow-wrap: anywhere; }
-.financeiro-redes-divida dd { margin: 0; color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; }
+.financeiro-redes-divida dt { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.financeiro-redes-divida dd { margin: 0; color: var(--ink); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .financeiro-divida-rodape {
   display: flex;
   align-items: center;
