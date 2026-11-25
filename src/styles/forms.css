@@ -103,6 +103,20 @@
 .filtros { display: grid; gap: 8px; }
 .filtro-linha { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .acoes-card.financeiro-acoes-divida { flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.linha.financeiro-grupo-dividas { align-items: flex-start; }
+.financeiro-grupo-dividas > .bolinha { margin-top: 4px; }
+.financeiro-total-divida, .financeiro-redes-divida > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.financeiro-total-divida { flex-wrap: wrap; }
+.financeiro-redes-divida { margin: 3px 0; font-size: 13px; }
+.financeiro-redes-divida dt { color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
+.financeiro-redes-divida dd { margin: 0; font-weight: 700; }
+.financeiro-detalhes-divida summary { cursor: pointer; width: fit-content; padding: 6px 0; font-size: 13px; }
+.financeiro-detalhes-divida li { padding: 7px 0; border-top: 1px solid var(--line); }
 .segmento .financeiro-opcao-divida { grid-column: 1 / -1; }
 .filtro-linha > span { font-size: 12px; font-weight: 700; color: var(--muted); margin-right: 4px; }
 

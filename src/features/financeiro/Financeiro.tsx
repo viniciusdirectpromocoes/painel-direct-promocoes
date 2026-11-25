@@ -6,6 +6,7 @@ import { dataCurta, hoje, lerValor, moeda, uid } from "../../core/format";
 import { FORMA_PAGAMENTO, SETORES, VALOR_DIARIA } from "../../core/constants";
 import { textoDiarias, quantidadeDiarias, pendenteDaDiaria } from "../../core/regras";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
+import { agruparDividas, DividasAgrupadas } from "./DividasAgrupadas";
 import "../../styles/forms.css";
 
 type Props = { dados: Dados; setDados: SetDados; notificar: (t: string) => void };
@@ -108,16 +109,16 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
 
   const lista = useMemo(() => {
     const termo = busca.trim().toLowerCase();
-    return dados.lancamentos
+    const filtrados = dados.lancamentos
       .filter((l) => {
         if (filtro === "pendentes") return valorEmAberto(l) > 0;
         if (filtro === "pagos") return l.categoria === "Pagamento" || (l.categoria === "Dívida" && Boolean(l.pagoEm));
         return filtro === "todos" || l.categoria === filtro;
       })
       .filter((l) => [l.descricao, l.setor, l.rede].some((valor) => valor?.toLowerCase().includes(termo)))
-      .slice()
       .sort((a, b) => (b.pagoEm || b.data || "").localeCompare(a.pagoEm || a.data || ""));
-  }, [dados.lancamentos, filtro, busca]);
+    return agruparDividas(filtrados, dados.diaristas);
+  }, [dados.lancamentos, dados.diaristas, filtro, busca]);
 
   const valorNumerico = lerValor(form.valor);
   const diariasCalculadas = textoDiarias(valorNumerico);
@@ -431,29 +432,13 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
           <p className="vazio">Nenhum lançamento com esses filtros.</p>
         ) : (
           <ul className="lista">
-            {lista.map((l) => {
-              if (l.categoria === "Dívida") {
+            {lista.map((linha) => {
+              if ("grupo" in linha) {
                 return (
-                  <li key={l.id} className="linha">
-                    <span className={`bolinha ${l.pagoEm ? "lime" : "amber"}`} />
-                    <div className="linha-texto">
-                      <strong>{nomeDiarista(l.diaristaId) ?? l.descricao}</strong>
-                      {l.rede && <span className="muted">{l.rede}</span>}
-                      <span className={`status ${l.pagoEm ? "pago" : "pendente"}`}>
-                        {l.pagoEm ? `Pago em ${dataCurta(l.pagoEm)}` : "Pendente de pagamento"}
-                      </span>
-                      <span className="acoes-card financeiro-acoes-divida">
-                        {!l.pagoEm && (
-                          <button type="button" className="botao primario mini" onClick={() => marcarComoPago(l.id)}>Já paguei</button>
-                        )}
-                        <button type="button" className="link" onClick={() => editar(l)}>Editar</button>
-                        <button type="button" className="link perigo" onClick={() => excluir(l)}>Excluir</button>
-                      </span>
-                    </div>
-                    <span className={l.pagoEm ? "neg nowrap" : "muted nowrap"}>{moeda(l.valor)}</span>
-                  </li>
+                  <DividasAgrupadas key={linha.grupo.chave} grupo={linha.grupo} pagar={marcarComoPago} editar={editar} excluir={excluir} />
                 );
               }
+              const l = linha.lancamento;
 
               if (l.categoria === "Pagamento" || l.categoria === "Adiantamento") {
                 const descontado = centavos((l.alocacoes ?? []).reduce((s, a) => s + a.valor, 0));
