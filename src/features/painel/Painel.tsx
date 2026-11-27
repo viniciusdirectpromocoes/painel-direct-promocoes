@@ -2,7 +2,7 @@ import type { Dados, Pagina } from "../../core/types";
 import { AnimatedNumber } from "../../components/AnimatedNumber";
 import { dataCurta, moeda } from "../../core/format";
 import { disponivel, quantidadeDiarias } from "../../core/regras";
-import { ehSaida, valorEmAberto } from "../../core/financeiro";
+import { valorDaSaida, valorEmAberto } from "../../core/financeiro";
 import { VALOR_DIARIA } from "../../core/constants";
 
 type Props = { dados: Dados; irPara: (p: Pagina) => void };
@@ -12,8 +12,7 @@ export function Painel({ dados, irPara }: Props) {
     .filter((l) => l.categoria === "Recebimento")
     .reduce((s, l) => s + l.valor, 0);
   const saidas = dados.lancamentos
-    .filter(ehSaida)
-    .reduce((s, l) => s + l.valor, 0);
+    .reduce((s, l) => s + valorDaSaida(l), 0);
   const disponiveis = dados.diaristas.filter(disponivel).length;
   const nomes = new Map(dados.diaristas.map((d) => [d.id, d.nome]));
   const porPessoa = new Map<string, { nome: string; valor: number; registros: number }>();
@@ -110,21 +109,24 @@ export function Painel({ dados, irPara }: Props) {
             <p className="vazio">Nenhum lançamento ainda. Registre uma entrada ou saída no Financeiro.</p>
           ) : (
             <ul className="lista">
-              {recentes.map((l) => (
-                <li key={l.id} className="linha">
-                  <span className={`bolinha ${l.categoria === "Recebimento" ? "lime" : ehSaida(l) ? "amber" : "cyan"}`} />
-                  <div className="linha-texto">
-                    <strong>{l.descricao}</strong>
-                    <span className="muted">
-                      {l.categoria}
-                      {l.categoria === "Diárias" ? ` · dia ${l.diaPagamento}` : ` · ${dataCurta(l.pagoEm || l.data)}`}
+              {recentes.map((l) => {
+                const saida = valorDaSaida(l);
+                return (
+                  <li key={l.id} className="linha">
+                    <span className={`bolinha ${l.categoria === "Recebimento" ? "lime" : saida > 0 ? "amber" : "cyan"}`} />
+                    <div className="linha-texto">
+                      <strong>{l.descricao}</strong>
+                      <span className="muted">
+                        {l.categoria}
+                        {l.categoria === "Diárias" ? ` · dia ${l.diaPagamento}` : ` · ${dataCurta(l.pagoEm || l.data)}`}
+                      </span>
+                    </div>
+                    <span className={l.categoria === "Recebimento" ? "pos" : saida > 0 ? "neg" : "muted"}>
+                      {l.categoria === "Recebimento" ? "+" : saida > 0 ? "−" : ""} {moeda(saida || l.valor)}
                     </span>
-                  </div>
-                  <span className={l.categoria === "Recebimento" ? "pos" : ehSaida(l) ? "neg" : "muted"}>
-                    {l.categoria === "Recebimento" ? "+" : ehSaida(l) ? "−" : ""} {moeda(l.valor)}
-                  </span>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>

@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { centavos } from "../../core/financeiro";
+import { centavos, valorEmAberto, valorPagoDaDivida } from "../../core/financeiro";
 import { dataCurta, moeda } from "../../core/format";
 import type { CorRede } from "../../core/redes";
 import type { Diarista, Lancamento } from "../../core/types";
@@ -42,7 +42,7 @@ export function agruparDividas(lista: Lancamento[], diaristas: Diarista[]): Linh
 }
 
 type Acoes = {
-  pagar: (id: string) => void;
+  pagar: (item: Lancamento) => void;
   editar: (item: Lancamento) => void;
   excluir: (item: Lancamento) => void;
 };
@@ -50,8 +50,8 @@ type Acoes = {
 function AcoesDivida({ item, pagar, editar, excluir }: Acoes & { item: Lancamento }) {
   return (
     <div className="acoes-card financeiro-acoes-divida">
-      {!item.pagoEm && (
-        <button type="button" className="botao primario mini" onClick={() => pagar(item.id)}>Já paguei</button>
+      {valorEmAberto(item) > 0 && (
+        <button type="button" className="botao primario mini" onClick={() => pagar(item)}>Já paguei</button>
       )}
       <button type="button" className="link" onClick={() => editar(item)}>Editar</button>
       <button type="button" className="link perigo" onClick={() => excluir(item)}>Excluir</button>
@@ -59,15 +59,18 @@ function AcoesDivida({ item, pagar, editar, excluir }: Acoes & { item: Lancament
   );
 }
 
-export function DividasAgrupadas({ grupo, coresDasRedes, ...acoes }: Acoes & {
+export function DividasAgrupadas({ grupo, coresDasRedes, visao, ...acoes }: Acoes & {
   grupo: GrupoDividas;
   coresDasRedes: ReadonlyMap<string, CorRede>;
+  visao: "todos" | "pendentes" | "pagos";
 }) {
   const [aberto, setAberto] = useState(false);
   const detalhesId = useId();
   const porRede = new Map<string, { nome: string; valor: number; cor?: CorRede }>();
   let total = 0;
   let pendente = 0;
+  const valorExibido = (item: Lancamento) => visao === "pendentes" ? valorEmAberto(item) :
+    visao === "pagos" ? valorPagoDaDivida(item) : item.valor;
   for (const item of grupo.itens) {
     const redeCadastrada = item.rede?.trim();
     const nome = redeCadastrada || "Sem rede";
@@ -76,15 +79,19 @@ export function DividasAgrupadas({ grupo, coresDasRedes, ...acoes }: Acoes & {
     const cor = redeCadastrada ? coresDasRedes.get(redeCadastrada) : undefined;
     porRede.set(chave, {
       nome: soma?.nome ?? nome,
-      valor: centavos((soma?.valor ?? 0) + item.valor),
+      valor: centavos((soma?.valor ?? 0) + valorExibido(item)),
       cor: soma?.cor ?? cor,
     });
     total = centavos(total + item.valor);
-    if (!item.pagoEm) pendente = centavos(pendente + item.valor);
+    pendente = centavos(pendente + valorEmAberto(item));
   }
   const item = grupo.itens[0];
   const grupoUnico = grupo.itens.length === 1;
   const situacao = pendente === 0 ? "pago" : pendente === total ? "pendente" : "parcial";
+  const pago = centavos(total - pendente);
+  const totalExibido = visao === "pendentes" ? pendente : visao === "pagos" ? pago : total;
+  const rotuloTotal = visao === "pendentes" || situacao === "pendente" ? "A pagar" :
+    visao === "pagos" || situacao === "pago" ? "Total pago" : "Total";
   const rotulo = { pago: "Pago", pendente: "Em aberto", parcial: "Parcialmente pago" }[situacao];
   const cabecalho = (
     <>
@@ -93,8 +100,8 @@ export function DividasAgrupadas({ grupo, coresDasRedes, ...acoes }: Acoes & {
         <span className={`financeiro-divida-status ${situacao}`}>{rotulo}</span>
       </span>
       <span className="financeiro-divida-total">
-        <span>{situacao === "pendente" ? "A pagar" : situacao === "pago" ? "Total pago" : "Total"}</span>
-        <strong>{moeda(total)}</strong>
+        <span>{rotuloTotal}</span>
+        <strong>{moeda(totalExibido)}</strong>
       </span>
     </>
   );
@@ -116,7 +123,7 @@ export function DividasAgrupadas({ grupo, coresDasRedes, ...acoes }: Acoes & {
         </button>
       )}
       {situacao === "parcial" && (
-        <p className="financeiro-divida-rodape">{moeda(pendente)} em aberto · {moeda(centavos(total - pendente))} pagos</p>
+        <p className="financeiro-divida-rodape">{moeda(pendente)} em aberto · {moeda(pago)} pagos</p>
       )}
       <dl className="financeiro-redes-divida" aria-label="Valores por rede">
         {[...porRede.entries()].map(([chave, rede]) => (
@@ -141,10 +148,12 @@ export function DividasAgrupadas({ grupo, coresDasRedes, ...acoes }: Acoes & {
                     <div>
                       <strong>{divida.rede || "Sem rede"}</strong>
                       <span className="muted">
-                        {divida.pagoEm ? `Pago em ${dataCurta(divida.pagoEm)}` : `Em aberto · ${dataCurta(divida.data)}`}
+                        {divida.pagoEm ? `Pago em ${dataCurta(divida.pagoEm)}` :
+                          valorPagoDaDivida(divida) > 0 ? `${moeda(valorPagoDaDivida(divida))} pagos · ${moeda(valorEmAberto(divida))} em aberto` :
+                          `Em aberto · ${dataCurta(divida.data)}`}
                       </span>
                     </div>
-                    <strong>{moeda(divida.valor)}</strong>
+                    <strong>{moeda(valorExibido(divida))}</strong>
                   </div>
                   <AcoesDivida item={divida} {...acoes} />
                 </li>

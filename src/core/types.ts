@@ -89,7 +89,7 @@ export type Lancamento = {
   rede: string; // rede associada ao recebimento ou à dívida avulsa
   // Diárias e Pagamento
   diaristaId?: string;
-  // Diárias: quanto já foi pago, descontado pelos pagamentos
+  // Diárias e dívidas: quanto já foi pago
   pagoValor?: number;
   // Pagamento: em quais diárias o valor foi descontado (o que sobrar é adiantamento)
   alocacoes?: { diariaId: string; valor: number }[];

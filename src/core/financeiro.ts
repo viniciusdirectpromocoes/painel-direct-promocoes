@@ -6,14 +6,18 @@ type Alocacao = { diariaId: string; valor: number };
 /** Arredonda para centavos, evitando erros de ponto flutuante. */
 export const centavos = (n: number) => Math.round(n * 100) / 100;
 
-export function valorEmAberto(item: Lancamento) {
-  if (item.categoria === "Diárias") return pendenteDaDiaria(item);
-  return item.categoria === "Dívida" && !item.pagoEm ? item.valor : 0;
+export function valorPagoDaDivida(item: Lancamento) {
+  return centavos(Math.min(item.valor, Math.max(0, item.pagoValor ?? (item.pagoEm ? item.valor : 0))));
 }
 
-export function ehSaida(item: Lancamento) {
-  return item.categoria === "Pagamento" || item.categoria === "Adiantamento" ||
-    (item.categoria === "Dívida" && Boolean(item.pagoEm));
+export function valorEmAberto(item: Lancamento) {
+  if (item.categoria === "Diárias") return pendenteDaDiaria(item);
+  return item.categoria === "Dívida" ? centavos(item.valor - valorPagoDaDivida(item)) : 0;
+}
+
+export function valorDaSaida(item: Lancamento) {
+  if (item.categoria === "Pagamento" || item.categoria === "Adiantamento") return item.valor;
+  return item.categoria === "Dívida" ? valorPagoDaDivida(item) : 0;
 }
 
 /**

@@ -1,4 +1,4 @@
-import { centavos, alocarNasDiarias, aplicarAlocacoes, reverterAlocacoes, ehSaida, valorEmAberto } from "../../core/financeiro";
+import { centavos, alocarNasDiarias, aplicarAlocacoes, reverterAlocacoes, valorDaSaida, valorEmAberto, valorPagoDaDivida } from "../../core/financeiro";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Dados, CategoriaLancamento, Lancamento, SetDados, TipoAdiantamento } from "../../core/types";
 import { upsert } from "../../core/store";
@@ -81,6 +81,8 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
   const [form, setForm] = useState<Form>(vazio);
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [formAberto, setFormAberto] = useState(false);
+  const [pagandoId, setPagandoId] = useState<string | null>(null);
+  const [valorPagamento, setValorPagamento] = useState("");
   const [erro, setErro] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const [busca, setBusca] = useState("");
@@ -97,9 +99,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
   );
   const pago = useMemo(
     () =>
-      dados.lancamentos
-        .filter(ehSaida)
-        .reduce((s, l) => s + l.valor, 0),
+      dados.lancamentos.reduce((s, l) => s + valorDaSaida(l), 0),
     [dados.lancamentos],
   );
   const emAberto = useMemo(
@@ -113,7 +113,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     const filtrados = dados.lancamentos
       .filter((l) => {
         if (filtro === "pendentes") return valorEmAberto(l) > 0;
-        if (filtro === "pagos") return l.categoria === "Pagamento" || (l.categoria === "Dívida" && Boolean(l.pagoEm));
+        if (filtro === "pagos") return l.categoria === "Pagamento" || (l.categoria === "Dívida" && valorPagoDaDivida(l) > 0);
         return filtro === "todos" || l.categoria === filtro;
       })
       .filter((l) => [l.descricao, l.setor, l.rede].some((valor) => valor?.toLowerCase().includes(termo)))
@@ -130,16 +130,20 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
 
   const nomeLoja = (id?: string) => dados.lojas.find((l) => l.id === id)?.nome;
   const nomeDiarista = (id?: string) => dados.diaristas.find((d) => d.id === id)?.nome;
+  const dividaPagando = dados.lancamentos.find((l) => l.id === pagandoId && l.categoria === "Dívida");
+  const saldoPagamento = dividaPagando ? valorEmAberto(dividaPagando) : 0;
 
   // Fecha a janela com Esc.
   useEffect(() => {
-    if (!formAberto) return;
+    if (!formAberto && !pagandoId) return;
     const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === "Escape") fecharForm();
+      if (e.key !== "Escape") return;
+      if (pagandoId) fecharPagamento();
+      else fecharForm();
     };
     window.addEventListener("keydown", aoTeclar);
     return () => window.removeEventListener("keydown", aoTeclar);
-  }, [formAberto]);
+  }, [formAberto, pagandoId]);
 
   function atualizar<K extends keyof Form>(campo: K, valor: Form[K]) {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -168,6 +172,10 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     if (form.categoria === "Dívida") {
       if (centavos(valorNumerico) < 0.01 || !Number.isFinite(centavos(valorNumerico))) return "Informe um valor válido em reais.";
       if (!form.nomeAvulso.trim()) return "Informe o nome do diarista.";
+      const original = dados.lancamentos.find((l) => l.id === editandoId);
+      if (original && centavos(valorNumerico) < valorPagoDaDivida(original)) {
+        return "O valor da dívida precisa cobrir o que já foi pago.";
+      }
     }
     if (form.categoria === "Diárias") {
       if (!form.diaristaId) return "Escolha a diarista.";
@@ -224,11 +232,13 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         (correspondencias.length === 1 ? correspondencias[0] : undefined);
       setDados((estado) => {
         const original = estado.lancamentos.find((l) => l.id === id);
+        const valor = centavos(valorNumerico);
+        const pagoValor = original ? valorPagoDaDivida(original) : 0;
         const item: Lancamento = {
           id, categoria: "Dívida", descricao: diarista?.nome ?? nomeDigitado, diaristaId: diarista?.id,
-          valor: centavos(valorNumerico), formaPagamento: FORMA_PAGAMENTO,
+          valor, formaPagamento: FORMA_PAGAMENTO, pagoValor,
           setor: "", diasTrabalhados: [], diaPagamento: 0, rede: form.rede,
-          data: original?.data ?? form.data, pagoEm: original?.pagoEm,
+          data: original?.data ?? form.data, pagoEm: pagoValor === valor ? original?.pagoEm ?? hoje() : undefined,
         };
         return { ...estado, lancamentos: upsert(estado.lancamentos, item) };
       });
@@ -347,15 +357,36 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
     setFormAberto(true);
   }
 
-  function marcarComoPago(id: string) {
-    const pagoEm = hoje();
+  function abrirPagamento(item: Lancamento) {
+    setErro("");
+    setValorPagamento(valorEmAberto(item).toFixed(2).replace(".", ","));
+    setPagandoId(item.id);
+  }
+
+  function fecharPagamento() {
+    setPagandoId(null);
+    setErro("");
+  }
+
+  function registrarPagamento(e: FormEvent) {
+    e.preventDefault();
+    if (!dividaPagando) return;
+    const valor = centavos(lerValor(valorPagamento));
+    if (!Number.isFinite(valor) || valor <= 0 || valor > saldoPagamento) {
+      setErro(`Informe um valor maior que zero e de até ${moeda(saldoPagamento)}.`);
+      return;
+    }
+    const data = hoje();
     setDados((estado) => ({
       ...estado,
-      lancamentos: estado.lancamentos.map((l) =>
-        l.id === id && l.categoria === "Dívida" && !l.pagoEm ? { ...l, pagoEm } : l,
-      ),
+      lancamentos: estado.lancamentos.map((l) => {
+        if (l.id !== dividaPagando.id || l.categoria !== "Dívida" || valor > valorEmAberto(l)) return l;
+        const pagoValor = centavos(valorPagoDaDivida(l) + valor);
+        return { ...l, pagoValor, pagoEm: pagoValor === l.valor ? data : undefined };
+      }),
     }));
-    notificar("Pagamento registrado em Já pagos");
+    fecharPagamento();
+    notificar(valor === saldoPagamento ? "Dívida quitada" : "Pagamento parcial registrado");
   }
 
   function excluir(l: Lancamento) {
@@ -436,7 +467,7 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
             {lista.map((linha) => {
               if ("grupo" in linha) {
                 return (
-                  <DividasAgrupadas key={linha.grupo.chave} grupo={linha.grupo} coresDasRedes={coresDasRedes} pagar={marcarComoPago} editar={editar} excluir={excluir} />
+                  <DividasAgrupadas key={linha.grupo.chave} grupo={linha.grupo} coresDasRedes={coresDasRedes} visao={filtro === "pendentes" || filtro === "pagos" ? filtro : "todos"} pagar={abrirPagamento} editar={editar} excluir={excluir} />
                 );
               }
               const l = linha.lancamento;
@@ -536,6 +567,32 @@ export function Financeiro({ dados, setDados, notificar }: Props) {
         )}
       </section>
 
+      {dividaPagando && (
+        <div className="modal-fundo" onClick={fecharPagamento}>
+          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-pagar-divida" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-topo">
+              <h2 id="titulo-pagar-divida">Registrar pagamento</h2>
+              <button type="button" className="modal-fechar" aria-label="Fechar" onClick={fecharPagamento}>×</button>
+            </div>
+            <form className="form" onSubmit={registrarPagamento} noValidate>
+              <p className="muted">
+                {nomeDiarista(dividaPagando.diaristaId) ?? dividaPagando.descricao}
+                {dividaPagando.rede ? ` · ${dividaPagando.rede}` : ""}
+                {` · Em aberto ${moeda(saldoPagamento)}`}
+              </p>
+              <label className="campo">
+                <span>Valor pago (R$)</span>
+                <input autoFocus inputMode="decimal" value={valorPagamento} onFocus={(e) => e.target.select()} onChange={(e) => setValorPagamento(e.target.value)} />
+              </label>
+              {erro && <p className="erro" role="alert">{erro}</p>}
+              <div className="acoes">
+                <button type="button" className="botao secundario" onClick={fecharPagamento}>Cancelar</button>
+                <button type="submit" className="botao primario">Confirmar pagamento</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {formAberto && (
         <div className="modal-fundo" onClick={fecharForm}>
           <div
